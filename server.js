@@ -14,7 +14,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/api/chart-boilerplate/:chartType', (req, res) => {
     const chartType = req.params.chartType;
     console.log(`[SERVER] Received request for boilerplate of type: ${chartType}`);
-    const boilerplate = chartService.getChartBoilerplate(chartType);
+    const boilerplate = chartService.getChartBoilerplate(chartType, req.query);
     console.log(`[SERVER] Returning boilerplate for ${chartType}`);
     setTimeout(() => {
         res.json(boilerplate);

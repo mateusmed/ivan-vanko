@@ -17,6 +17,38 @@ function createOrUpdateChart(elementId, type, data, options) {
         console.log(`[CLIENT] Loading indicator not found for ${elementId}`);
     }
 
+    if (data.filters) {
+        let filtersContainer = chartContainer.querySelector('.chart-filters');
+        if (!filtersContainer) {
+            filtersContainer = document.createElement('div');
+            filtersContainer.className = 'chart-filters';
+            chartContainer.insertBefore(filtersContainer, canvas);
+        }
+        filtersContainer.innerHTML = '';
+
+        data.filters.forEach(filter => {
+            const select = document.createElement('select');
+            select.dataset.key = filter.key;
+            filter.options.forEach(option => {
+                const opt = document.createElement('option');
+                opt.value = option;
+                opt.text = option;
+                select.appendChild(opt);
+            });
+            select.value = filter.selected;
+            filtersContainer.appendChild(select);
+
+            select.addEventListener('change', () => {
+                const queryParams = new URLSearchParams();
+                chartContainer.querySelectorAll('.chart-filters select').forEach(s => {
+                    queryParams.append(s.dataset.key, s.value);
+                });
+                const newUrl = `/api/chart-boilerplate/${type}?${queryParams.toString()}`;
+                fetchChartData(elementId, newUrl, type, options);
+            });
+        });
+    }
+
     const ctx = canvas.getContext('2d');
     if (charts[elementId]) {
         // Update existing chart

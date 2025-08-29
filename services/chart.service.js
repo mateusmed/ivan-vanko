@@ -1,14 +1,45 @@
-function getChartBoilerplate(chartType) {
+function getChartBoilerplate(chartType, queryParams) {
     switch (chartType) {
         case 'bar':
-            return {
-                labels: ['Electronics', 'Clothing', 'Books'],
-                datasets: [{
-                    label: 'Overall Sales',
-                    data: [550, 350, 260],
-                    backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)']
-                }]
+            const barChart = {
+              "labels": ["Electronics", "Clothing", "Books"],
+              "datasets": [
+                {
+                  "label": "Overall Sales",
+                  "data": [550, 350, 260],
+                  "backgroundColor": [
+                    "rgba(255, 99, 132, 0.6)",
+                    "rgba(54, 162, 235, 0.6)",
+                    "rgba(255, 206, 86, 0.6)"
+                  ]
+                }
+              ],
+              "filters": [
+                {
+                  "type": "selectItem",
+                  "label": "Region",
+                  "key": "region",
+                  "options": ["All", "North", "South", "East", "West"],
+                  "selected": "All"
+                },
+                {
+                  "type": "selectItem",
+                  "label": "Year",
+                  "key": "year",
+                  "options": ["All", "2023", "2024", "2025"],
+                  "selected": "All"
+                }
+              ]
             };
+            if (queryParams && Object.keys(queryParams).length > 0) {
+                barChart.datasets[0].data = [Math.random() * 1000, Math.random() * 1000, Math.random() * 1000];
+                barChart.filters.forEach(filter => {
+                    if (queryParams[filter.key]) {
+                        filter.selected = queryParams[filter.key];
+                    }
+                });
+            }
+            return barChart;
         case 'pie':
             return {
                 labels: ['Product A', 'Product B', 'Product C'],
