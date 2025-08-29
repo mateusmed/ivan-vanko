@@ -1,103 +1,11 @@
-const charts = {};
-const pollingConfig = {};
+import { charts, pollingConfig, createOrUpdateChart, fetchChartData } from './chart.js';
 
-function createOrUpdateChart(elementId, type, data, options) {
-    console.log(`[CLIENT] Creating or updating chart ${elementId}`);
-    const canvas = document.getElementById(elementId);
-    if (!canvas) {
-        console.error(`[CLIENT] Canvas element not found for ${elementId}`);
-        return;
-    }
-    const chartContainer = canvas.parentElement;
-    const loadingIndicator = chartContainer.querySelector('.loading-indicator');
-    if (loadingIndicator) {
-        console.log(`[CLIENT] Hiding loading indicator for ${elementId}`);
-        loadingIndicator.style.display = 'none';
-    } else {
-        console.log(`[CLIENT] Loading indicator not found for ${elementId}`);
-    }
-
-    if (data.filters) {
-        let filtersContainer = chartContainer.querySelector('.chart-filters');
-        if (!filtersContainer) {
-            filtersContainer = document.createElement('div');
-            filtersContainer.className = 'chart-filters';
-            chartContainer.insertBefore(filtersContainer, canvas);
-        }
-        filtersContainer.innerHTML = '';
-
-        data.filters.forEach(filter => {
-            const select = document.createElement('select');
-            select.dataset.key = filter.key;
-            filter.options.forEach(option => {
-                const opt = document.createElement('option');
-                opt.value = option;
-                opt.text = option;
-                select.appendChild(opt);
-            });
-            select.value = filter.selected;
-            filtersContainer.appendChild(select);
-
-            select.addEventListener('change', () => {
-                const queryParams = new URLSearchParams();
-                chartContainer.querySelectorAll('.chart-filters select').forEach(s => {
-                    queryParams.append(s.dataset.key, s.value);
-                });
-                const newUrl = `/api/chart-boilerplate/${type}?${queryParams.toString()}`;
-                fetchChartData(elementId, newUrl, type, options);
-            });
-        });
-    }
-
-    const ctx = canvas.getContext('2d');
-    if (charts[elementId]) {
-        // Update existing chart
-        charts[elementId].data.labels = data.labels;
-        charts[elementId].data.datasets = data.datasets;
-        // Merge options if necessary, or reassign if a full replacement is desired
-        
-        charts[elementId].update();
-    } else {
-        // Create new chart
-        charts[elementId] = new Chart(ctx, { type, data, options });
-        charts[elementId].config.customUrl = options.customUrl;
-        charts[elementId].config.pollingSeconds = options.pollingSeconds;
-        charts[elementId].config.type = type;
-        charts[elementId].options = options;
-    }
-    console.log(`[CLIENT] Chart ${elementId} created successfully`);
-}
-
-function fetchChartData(elementId, url, type, options) {
-    console.log(`[CLIENT] Fetching data for ${elementId} from ${url}`);
-    fetch(url)
-        .then(response => {
-            console.log(`[CLIENT] Received response for ${elementId}`, response);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log(`[CLIENT] Received data for ${elementId}`, data);
-            createOrUpdateChart(elementId, type, data, options);
-        })
-        .catch(error => {
-            console.error(`[CLIENT] Error fetching data for ${elementId}:`, error);
-            const chartContainer = document.getElementById(elementId)?.parentElement;
-            if (chartContainer) {
-                const loadingIndicator = chartContainer.querySelector('.loading-indicator');
-                if (loadingIndicator) {
-                    loadingIndicator.textContent = 'Error!';
-                }
-            }
-        });
-}
 
 function setupChartSettingsForItem(item, grid) {
     console.log('[CLIENT] Setting up chart settings for item:', item);
     const content = item.querySelector('.grid-stack-item-content');
-    const h3 = content.querySelector('h3');
+    let h3 = content.querySelector('h3');
+
     if (h3 && !content.querySelector('.chart-header')) { // Check if header already exists
         const header = document.createElement('div');
         header.className = 'chart-header';
@@ -117,6 +25,46 @@ function setupChartSettingsForItem(item, grid) {
         header.appendChild(settings);
         content.insertBefore(header, h3);
         content.removeChild(h3);
+        h3 = header.querySelector('h3'); // Get the new h3 inside the header
+
+        // Make chart title editable on click
+        h3.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const currentText = h3.textContent;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = currentText;
+            input.className = 'chart-title-input';
+
+            h3.replaceWith(input);
+            input.focus();
+
+            const updateTitle = () => {
+                const newTitle = input.value.trim();
+                if (newTitle) {
+                    h3.textContent = newTitle;
+                    const chartId = item.querySelector('canvas').id;
+                    const node = item.gridstackNode; // Get the GridStack node
+                    if (node) {
+                        node.chartTitle = newTitle; // Update the node's chartTitle
+                    }
+                    if (charts[chartId]) {
+                        charts[chartId].options.plugins.title.text = newTitle;
+                        charts[chartId].update();
+                    }
+                } else {
+                    h3.textContent = currentText; // Revert if empty
+                }
+                input.replaceWith(h3);
+            };
+
+            input.addEventListener('blur', updateTitle);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    updateTitle();
+                }
+            });
+        });
 
         const settingsBtn = header.querySelector('.chart-settings-btn');
         settingsBtn.addEventListener('click', (event) => {
@@ -142,13 +90,11 @@ function setupChartSettingsForItem(item, grid) {
             if (isStatic) {
                 grid.movable(gridItem, true);
                 grid.resizable(gridItem, true);
-                // gridItem.removeAttribute('gs-static'); // GridStack handles this
                 node.static = false; // Update the node's static property
                 event.currentTarget.textContent = 'Fix';
             } else {
                 grid.movable(gridItem, false);
                 grid.resizable(gridItem, false);
-                // gridItem.setAttribute('gs-static', 'true'); // GridStack handles this
                 node.static = true; // Update the node's static property
                 event.currentTarget.textContent = 'Unfix';
             }
@@ -243,7 +189,8 @@ function addNewChart(grid, chartType) {
         // Custom attributes to be saved with the widget
         chartId: chartId,
         chartType: chartType,
-        chartUrl: initialUrl // Initial URL, will be updated on configure
+        chartUrl: initialUrl, // Initial URL, will be updated on configure
+        chartTitle: chartTitle // Store the initial chart title
     };
 
     const newWidget = grid.addWidget(newItem);
@@ -267,13 +214,20 @@ function openConfigureModal(chartId) {
     const modal = document.getElementById('configure-modal');
     const jsonStructure = document.getElementById('json-structure');
     const curlCommand = document.getElementById('curl-command');
-    const chartType = charts[chartId].config.type;
+    const poolingSecondsInput = document.getElementById('pooling-seconds');
 
-    fetch(`/api/chart-boilerplate/${chartType}`)
+    const chartElement = document.getElementById(chartId);
+    const gridItem = chartElement.closest('.grid-stack-item');
+    const node = gridItem.gridstackNode; // Get the GridStack node for the current chart
+
+    // Populate the modal fields with current chart data
+    poolingSecondsInput.value = node.poolingSeconds || '60'; // Set current pooling seconds
+
+    fetch(`/api/chart-boilerplate/${node.chartType}`)
         .then(response => response.json())
         .then(data => {
             jsonStructure.textContent = JSON.stringify(data, null, 2);
-            curlCommand.value = `curl -X GET ${window.location.origin}/api/chart-boilerplate/${chartType}`;
+            curlCommand.value = `curl -X GET ${window.location.origin}/api/chart-boilerplate/${node.chartType}`;
             modal.style.display = 'block';
         });
 
@@ -290,14 +244,21 @@ function openConfigureModal(chartId) {
 
     const updateBtn = modal.querySelector('#update-chart-btn');
     updateBtn.onclick = function() {
-        const curlCommand = document.getElementById('curl-command').value;
+        const newCurlCommand = curlCommand.value;
+        const newPoolingSeconds = poolingSecondsInput.value;
+        
         const urlRegex = /\s(https?:\/\/[^\s]+)/;
-        let newUrl = urlRegex.exec(curlCommand)[1];
-        const poolingSeconds = document.getElementById('pooling-seconds').value;
+        let newUrl = urlRegex.exec(newCurlCommand)[1];
         
         // Ensure newUrl includes the origin if it's a relative path
         if (!newUrl.startsWith('http://') && !newUrl.startsWith('https://')) {
             newUrl = window.location.origin + newUrl;
+        }
+
+        // Update the GridStack node with new properties
+        if (node) {
+            node.chartUrl = newUrl;
+            node.poolingSeconds = newPoolingSeconds;
         }
 
         if (pollingConfig[chartId]) {
@@ -306,23 +267,13 @@ function openConfigureModal(chartId) {
 
         pollingConfig[chartId] = {
             url: newUrl,
-            interval: poolingSeconds * 1000,
+            interval: newPoolingSeconds * 1000,
             intervalId: setInterval(() => {
                 fetchChartData(chartId, newUrl, charts[chartId].config.type, charts[chartId].options);
-            }, poolingSeconds * 1000)
+            }, newPoolingSeconds * 1000)
         };
 
-        // Update the chartUrl property of the GridStack item
-        const gridItem = document.getElementById(chartId).closest('.grid-stack-item');
-        if (gridItem) {
-            const node = grid.engine.nodes.find(n => n.id === gridItem.gridstackNode.id);
-            if (node) {
-                node.chartUrl = newUrl;
-                node.poolingSeconds = poolingSeconds; // Also save pooling seconds to the node
-            }
-        }
-
-        console.log('[CLIENT] Updating chart with:', { newUrl, poolingSeconds });
+        console.log('[CLIENT] Updating chart with:', { newUrl, newPoolingSeconds });
         modal.style.display = 'none';
     }
 }
@@ -370,13 +321,14 @@ export function initializeDashboard() {
                 // Convert the loaded layout to GridStack format
                 const gridStackLayout = layout.map(chartConfig => {
                     const chartId = `loaded-chart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`; // Generate a new unique ID
+                    const loadedChartTitle = chartConfig.properties.title || `${chartConfig.type.charAt(0).toUpperCase() + chartConfig.type.slice(1)} Chart`;
                     return {
                         x: chartConfig.coordinates.x,
                         y: chartConfig.coordinates.y,
                         w: chartConfig.coordinates.w,
                         h: chartConfig.coordinates.h,
                         content: `
-                            <h3>${chartConfig.type.charAt(0).toUpperCase() + chartConfig.type.slice(1)} Chart</h3>
+                            <h3>${loadedChartTitle}</h3>
                             <div class="chart-container">
                                 <div class="loading-indicator">Loading...</div>
                                 <canvas id="${chartId}"></canvas>
@@ -386,6 +338,7 @@ export function initializeDashboard() {
                         chartType: chartConfig.type,
                         chartUrl: chartConfig.properties.url,
                         poolingSeconds: chartConfig.properties.pooling,
+                        chartTitle: loadedChartTitle, // Store the loaded chart title
                         static: chartConfig.fixed // Set the static property for GridStack
                     };
                 });
@@ -401,6 +354,7 @@ export function initializeDashboard() {
                     const chartType = chartConfig.chartType;
                     const chartUrl = chartConfig.chartUrl;
                     const poolingSeconds = chartConfig.poolingSeconds;
+                    const chartTitle = chartConfig.chartTitle; // Get the loaded chart title
 
                     // Define initial options for the chart (can be extended if options are saved)
                     const initialOptions = {
@@ -408,8 +362,8 @@ export function initializeDashboard() {
                         maintainAspectRatio: false,
                         plugins: {
                             title: {
-                                display: true,
-                                text: `${chartType.charAt(0).toUpperCase() + chartType.slice(1)} Chart`
+                                display: true, // Show the Chart.js internal title
+                                text: chartTitle // Use the loaded chart title
                             }
                         }
                     };
@@ -515,7 +469,8 @@ export function initializeDashboard() {
                         },
                         properties: {
                             url: widget.chartUrl,
-                            pooling: widget.poolingSeconds ? String(widget.poolingSeconds) : "60" // Default to "60" if not set
+                            pooling: widget.poolingSeconds ? String(widget.poolingSeconds) : "60", // Default to "60" if not set
+                            title: widget.chartTitle // Save the chart title
                         }
                     };
                 }
