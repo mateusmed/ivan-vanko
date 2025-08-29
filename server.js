@@ -1,8 +1,13 @@
 const express = require('express');
 const path = require('path');
 const chartService = require('./services/chart.service.js');
+const fs = require('fs');
+const fsPromises = require('fs/promises');
 const app = express();
 const port = 3000;
+
+// Middleware to parse JSON bodies
+app.use(express.json());
 
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -54,6 +59,68 @@ app.get('/api/random-bar-chart', (req, res) => {
     };
 
     res.json(data);
+});
+
+// Endpoint to get mocked layout 1
+app.get('/api/layouts/layout1', (req, res) => {
+    const mockedLayout = [
+        { x: 0, y: 0, w: 6, h: 13, content: '<h3>Mock Chart 1</h3><div class="chart-container"><canvas id="mock-chart-1"></canvas></div>' },
+        { x: 6, y: 0, w: 6, h: 13, content: '<h3>Mock Chart 2</h3><div class="chart-container"><canvas id="mock-chart-2"></canvas></div>' }
+    ];
+    res.json(mockedLayout);
+});
+
+// Endpoint to list saved dashboards
+app.get('/api/dashboards', async (req, res) => {
+    const dataDir = path.join(__dirname, 'data');
+    try {
+        await fsPromises.mkdir(dataDir, { recursive: true }); // Ensure directory exists
+        const files = await fsPromises.readdir(dataDir);
+        const dashboardNames = files
+            .filter(file => file.endsWith('.json'))
+            .map(file => file.replace('.json', ''));
+        res.status(200).json(dashboardNames);
+    } catch (error) {
+        console.error('[SERVER ERROR] Failed to list dashboards:', error);
+        res.status(500).json({ message: 'Failed to list dashboards', error: error.message });
+    }
+});
+
+// Endpoint to get a specific dashboard by name
+app.get('/api/dashboards/:name', async (req, res) => {
+    const dashboardName = req.params.name;
+    const filePath = path.join(__dirname, 'data', `${dashboardName}.json`);
+
+    try {
+        const data = await fsPromises.readFile(filePath, 'utf8');
+        res.status(200).json(JSON.parse(data));
+    } catch (error) {
+        console.error(`[SERVER ERROR] Failed to load dashboard "${dashboardName}":`, error);
+        res.status(404).json({ message: `Dashboard "${dashboardName}" not found`, error: error.message });
+    }
+});
+
+// Endpoint to save dashboard configuration
+app.post('/dashboard', async (req, res) => {
+    const config = req.body;
+    const dashboardName = req.query.name;
+
+    if (!dashboardName) {
+        return res.status(400).json({ message: 'Dashboard name is required.' });
+    }
+
+    const filePath = path.join(__dirname, 'data', `${dashboardName}.json`);
+
+    try {
+        // Ensure the data directory exists
+        await fsPromises.mkdir(path.dirname(filePath), { recursive: true });
+        await fsPromises.writeFile(filePath, JSON.stringify(config, null, 2));
+        console.log('[SERVER] Dashboard configuration saved to:', filePath);
+        res.status(200).json({ message: 'Dashboard configuration saved successfully!' });
+    } catch (error) {
+        console.error('[SERVER ERROR] Failed to save dashboard configuration:', error);
+        res.status(500).json({ message: 'Failed to save dashboard configuration', error: error.message });
+    }
 });
 
 // Basic error handling middleware

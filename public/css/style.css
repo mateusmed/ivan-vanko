@@ -241,3 +241,10 @@ textarea {
 .btn:hover {
     background-color: #286090;
 }
+
+.disabled-link {
+    color: #999 !important; /* Grey out the text */
+    cursor: not-allowed !important; /* Change cursor to indicate it's not clickable */
+    pointer-events: none; /* Disable click events */
+    text-decoration: none !important; /* Remove underline */
+}

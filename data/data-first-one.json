@@ -1,0 +1,58 @@
+[
+  {
+    "type": "bar",
+    "fixed": false,
+    "coordinates": {
+      "x": 0,
+      "y": 0,
+      "w": 6,
+      "h": 13
+    },
+    "properties": {
+      "url": "/api/chart-boilerplate/bar",
+      "pooling": "60"
+    }
+  },
+  {
+    "type": "pie",
+    "fixed": true,
+    "coordinates": {
+      "x": 10,
+      "y": 0,
+      "w": 2,
+      "h": 9
+    },
+    "properties": {
+      "url": "/api/chart-boilerplate/pie",
+      "pooling": "60"
+    }
+  },
+  {
+    "type": "line",
+    "fixed": false,
+    "coordinates": {
+      "x": 0,
+      "y": 13,
+      "w": 6,
+      "h": 13
+    },
+    "properties": {
+      "url": "/api/chart-boilerplate/line",
+      "pooling": "60"
+    }
+  },
+  {
+    "type": "line",
+    "fixed": false,
+    "coordinates": {
+      "x": 6,
+      "y": 13,
+      "w": 6,
+      "h": 13
+    },
+    "properties": {
+      "url": "/api/chart-boilerplate/line",
+      "pooling": "60"
+    }
+  }
+]
