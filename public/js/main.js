@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 async function populateLayoutsDropdown() {
-    const layoutsDropdown = document.getElementById('layouts-dropdown-content');
+    const layoutsDropdown = document.getElementById('layout-options');
     if (!layoutsDropdown) return;
 
     try {

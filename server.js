@@ -6,15 +6,9 @@ const fsPromises = require('fs/promises');
 const app = express();
 const port = 3000;
 
-// Middleware to parse JSON bodies
 app.use(express.json());
-
-// Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-
-
-// --- API Endpoints for Chart Data ---
 
 app.get('/api/chart-boilerplate/:chartType', (req, res) => {
     const chartType = req.params.chartType;
@@ -26,49 +20,6 @@ app.get('/api/chart-boilerplate/:chartType', (req, res) => {
     }, 2000);
 });
 
-app.get('/api/sales-data', (req, res) => {
-    setTimeout(() => {
-        res.json([
-            { Region: 'North', Category: 'Electronics', Sales: 150 },
-            { Region: 'North', Category: 'Clothing', Sales: 80 },
-            { Region: 'South', Category: 'Electronics', Sales: 120 },
-            { Region: 'South', Category: 'Clothing', Sales: 90 },
-            { Region: 'East', Category: 'Electronics', Sales: 200 },
-            { Region: 'East', Category: 'Clothing', Sales: 110 },
-            { Region: 'West', Category: 'Electronics', Sales: 180 },
-            { Region: 'West', Category: 'Clothing', Sales: 70 },
-            { Region: 'North', Category: 'Books', Sales: 50 },
-            { Region: 'South', Category: 'Books', Sales: 60 },
-            { Region: 'East', Category: 'Books', Sales: 70 },
-            { Region: 'West', Category: 'Books', Sales: 80 },
-        ]);
-    }, 5000);
-});
-
-app.get('/api/random-bar-chart', (req, res) => {
-    const randomData = () => Math.floor(Math.random() * 1000);
-    const randomColor = () => `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, 0.6)`;
-
-    const data = {
-        labels: ['Electronics', 'Clothing', 'Books'],
-        datasets: [{
-            label: 'Random Sales',
-            data: [randomData(), randomData(), randomData()],
-            backgroundColor: [randomColor(), randomColor(), randomColor()]
-        }]
-    };
-
-    res.json(data);
-});
-
-// Endpoint to get mocked layout 1
-app.get('/api/layouts/layout1', (req, res) => {
-    const mockedLayout = [
-        { x: 0, y: 0, w: 6, h: 13, content: '<h3>Mock Chart 1</h3><div class="chart-container"><canvas id="mock-chart-1"></canvas></div>' },
-        { x: 6, y: 0, w: 6, h: 13, content: '<h3>Mock Chart 2</h3><div class="chart-container"><canvas id="mock-chart-2"></canvas></div>' }
-    ];
-    res.json(mockedLayout);
-});
 
 // Endpoint to list saved dashboards
 app.get('/api/dashboards', async (req, res) => {

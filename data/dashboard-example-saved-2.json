@@ -1,0 +1,32 @@
+[
+  {
+    "type": "bar",
+    "fixed": false,
+    "coordinates": {
+      "x": 0,
+      "y": 0,
+      "w": 6,
+      "h": 13
+    },
+    "properties": {
+      "url": "/api/chart-boilerplate/bar",
+      "pooling": "60",
+      "title": "Bar Chart 0"
+    }
+  },
+  {
+    "type": "pie",
+    "fixed": false,
+    "coordinates": {
+      "x": 6,
+      "y": 0,
+      "w": 6,
+      "h": 13
+    },
+    "properties": {
+      "url": "/api/chart-boilerplate/pie",
+      "pooling": "60",
+      "title": "Pie Chart 1"
+    }
+  }
+]
