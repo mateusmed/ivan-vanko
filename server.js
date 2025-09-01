@@ -86,17 +86,42 @@ app.get('/api/dashboards', async (req, res) => {
     }
 });
 
+// Endpoint to list example layouts
+app.get('/api/layouts-examples', async (req, res) => {
+    const layoutsDir = path.join(__dirname, 'data', 'layouts-examples');
+    try {
+        await fsPromises.mkdir(layoutsDir, { recursive: true }); // Ensure directory exists
+        const files = await fsPromises.readdir(layoutsDir);
+        const layoutNames = files
+            .filter(file => file.endsWith('.json'))
+            .map(file => file.replace('.json', ''));
+        res.status(200).json(layoutNames);
+    } catch (error) {
+        console.error('[SERVER ERROR] Failed to list example layouts:', error);
+        res.status(500).json({ message: 'Failed to list example layouts', error: error.message });
+    }
+});
+
 // Endpoint to get a specific dashboard by name
 app.get('/api/dashboards/:name', async (req, res) => {
     const dashboardName = req.params.name;
-    const filePath = path.join(__dirname, 'data', `${dashboardName}.json`);
+    
+    // Try to load from data directory first
+    let filePath = path.join(__dirname, 'data', `${dashboardName}.json`);
 
     try {
-        const data = await fsPromises.readFile(filePath, 'utf8');
+        let data = await fsPromises.readFile(filePath, 'utf8');
         res.status(200).json(JSON.parse(data));
     } catch (error) {
-        console.error(`[SERVER ERROR] Failed to load dashboard "${dashboardName}":`, error);
-        res.status(404).json({ message: `Dashboard "${dashboardName}" not found`, error: error.message });
+        // If not found in data directory, try layouts-examples directory
+        filePath = path.join(__dirname, 'data', 'layouts-examples', `${dashboardName}.json`);
+        try {
+            let data = await fsPromises.readFile(filePath, 'utf8');
+            res.status(200).json(JSON.parse(data));
+        } catch (layoutError) {
+            console.error(`[SERVER ERROR] Failed to load dashboard "${dashboardName}" from both data and layouts-examples:`, error, layoutError);
+            res.status(404).json({ message: `Dashboard or example layout "${dashboardName}" not found`, error: error.message });
+        }
     }
 });
 

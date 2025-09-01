@@ -1,4 +1,4 @@
-import { charts, pollingConfig, createOrUpdateChart, fetchChartData } from './chart.js';
+import { charts, pollingConfig, createOrUpdateChart, fetchChartData } from './chart-build.js';
 
 
 function setupChartSettingsForItem(item, grid) {

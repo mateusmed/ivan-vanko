@@ -19,7 +19,33 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('Error loading dashboard.js:', error);
         });
     }
+
+    populateLayoutsDropdown();
 });
+
+async function populateLayoutsDropdown() {
+    const layoutsDropdown = document.getElementById('layouts-dropdown-content');
+    if (!layoutsDropdown) return;
+
+    try {
+        const response = await fetch('/api/layouts-examples');
+        if (response.ok) {
+            const layoutNames = await response.json();
+            // Clear existing dynamic layouts (if any, though none expected initially)
+            layoutsDropdown.innerHTML = ''; 
+            layoutNames.forEach(name => {
+                const a = document.createElement('a');
+                a.href = `/pages/dashboards.html?name=${encodeURIComponent(name)}`;
+                a.textContent = name;
+                layoutsDropdown.appendChild(a);
+            });
+        } else {
+            console.error('[CLIENT] Failed to fetch example layout list.');
+        }
+    } catch (error) {
+        console.error('[CLIENT] Error fetching example layout list:', error);
+    }
+}
 
 // Example of a function that might remain in script.js if it's used globally
 // function someGlobalFunction() {

@@ -38,13 +38,15 @@ export function createOrUpdateChart(elementId, type, data, options) {
             select.value = filter.selected;
             filtersContainer.appendChild(select);
 
-            select.addEventListener('change', () => {
+            select.addEventListener('change', (event) => {
                 const queryParams = new URLSearchParams();
                 chartContainer.querySelectorAll('.chart-filters select').forEach(s => {
                     queryParams.append(s.dataset.key, s.value);
                 });
-                const newUrl = `/api/chart-boilerplate/${type}?${queryParams.toString()}`;
-                fetchChartData(elementId, newUrl, type, options);
+                const chart = charts[elementId];
+                const chartType = chart.config.type;
+                const newUrl = `/api/chart-boilerplate/${chartType}?${queryParams.toString()}`;
+                fetchChartData(elementId, newUrl, chartType, options);
             });
         });
     }
