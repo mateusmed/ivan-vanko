@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     populateLayoutsDropdown();
+    populateDashboardsDropdown();
 });
 
 async function populateLayoutsDropdown() {
@@ -38,6 +39,33 @@ async function populateLayoutsDropdown() {
                 a.href = `/pages/dashboards.html?name=${encodeURIComponent(name)}`;
                 a.textContent = name;
                 layoutsDropdown.appendChild(a);
+            });
+        } else {
+            console.error('[CLIENT] Failed to fetch example layout list.');
+        }
+    } catch (error) {
+        console.error('[CLIENT] Error fetching example layout list:', error);
+    }
+}
+
+
+
+async function populateDashboardsDropdown() {
+    const dashboardDropdown = document.getElementById('dashboard-options');
+    if (!dashboardDropdown) return;
+
+    try {
+        const response = await fetch('/api/dashboards');
+        if (response.ok) {
+            const dashboardNames = await response.json();
+            // Clear existing dynamic layouts (if any, though none expected initially)
+            dashboardDropdown.innerHTML = '<a href="/pages/dashboards.html">Novo Dashboard</a>';
+
+            dashboardNames.forEach(name => {
+                const a = document.createElement('a');
+                a.href = `/pages/dashboards.html?name=${encodeURIComponent(name)}`;
+                a.textContent = name;
+                dashboardDropdown.appendChild(a);
             });
         } else {
             console.error('[CLIENT] Failed to fetch example layout list.');
