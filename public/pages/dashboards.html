@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gridstack@9.0.0/dist/gridstack.min.css" />
+    <link rel="stylesheet" href="/css/gridstack.min.css" />
 </head>
 <body>
     <header>
@@ -25,10 +25,7 @@
                 <div class="dropdown">
                     <a href="#layouts" class="dropbtn">Dashboards</a>
                     <div class="dropdown-content" id="layouts-dropdown">
-                        <a href="/dashboard.html">Novo Dashboard</a>
-                        <a href="#" data-layout="main_dashboard">Main Dashboard</a>
-                        <a href="#" data-layout="sales_focus">Sales Focus</a>
-                        <a href="#" data-layout="data_exploration">Data Exploration</a>
+                        <a href="/dashboards.html">Novo Dashboard</a>
                     </div>
                 </div>
 
@@ -57,12 +54,11 @@
     </main>
 
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../js/lib/chart.js"></script>
     <!-- Gridstack.js -->
-    <script src="https://cdn.jsdelivr.net/npm/gridstack@9.0.0/dist/gridstack-all.min.js"></script>
+    <script src="../js/lib/gridstack-all.min.js"></script>
     <!-- Custom JavaScript -->
-    <script src="js/layouts.js"></script>
-    <script src="js/script.js" type="module"></script>
+    <script src="../js/main.js" type="module"></script>
     <script src="../js/chart.js" type="module"></script>
     <script src="../js/dashboard.js" type="module"></script>
 
