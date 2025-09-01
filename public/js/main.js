@@ -20,6 +20,16 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+
+// Close dropdowns when clicking outside
+    window.addEventListener('click', (event) => {
+        if (!event.target.matches('.chart-settings-btn')) {
+            document.querySelectorAll('.chart-settings-dropdown').forEach(dropdown => {
+                dropdown.style.display = 'none';
+            });
+        }
+    });
+
     populateLayoutsDropdown();
     populateDashboardsDropdown();
 });
@@ -74,6 +84,8 @@ async function populateDashboardsDropdown() {
         console.error('[CLIENT] Error fetching example layout list:', error);
     }
 }
+
+
 
 // Example of a function that might remain in script.js if it's used globally
 // function someGlobalFunction() {
