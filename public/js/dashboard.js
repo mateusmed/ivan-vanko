@@ -285,6 +285,17 @@ export function initializeDashboard() {
         column: 12
     });
 
+    // Check for dashboard name in URL query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const dashboardNameFromUrl = urlParams.get('name');
+
+    if (dashboardNameFromUrl) {
+        loadDashboard(dashboardNameFromUrl);
+    } else {
+        // Initial population of the dropdown if no dashboard is specified in URL
+        populateDashboardsDropdown();
+    }
+
     grid.on('resizestop', function(event, el) {
         const chartId = el.querySelector('canvas').id;
         if (charts[chartId]) {
@@ -421,7 +432,7 @@ export function initializeDashboard() {
                 const dashboardNames = await response.json();
                 dashboardNames.forEach(name => {
                     const a = document.createElement('a');
-                    a.href = '#';
+                    a.href = `/pages/dashboards.html?name=${encodeURIComponent(name)}`;
                     a.textContent = name;
                     a.dataset.dashboardName = name; // Store the name for loading
                     a.addEventListener('click', (event) => {
@@ -436,6 +447,23 @@ export function initializeDashboard() {
         } catch (error) {
             console.error('[CLIENT] Error fetching dashboard list:', error);
         }
+    }
+
+    // Function to toggle dropdown visibility
+    function toggleDropdown(dropdownId) {
+        const dropdown = document.getElementById(dropdownId);
+        if (dropdown) {
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+    }
+
+    // Event listener for the Dashboards dropdown button
+    const dashboardsDropbtn = document.querySelector('.dropdown .dropbtn[href="#layouts"]');
+    if (dashboardsDropbtn) {
+        dashboardsDropbtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            toggleDropdown('layouts-dropdown');
+        });
     }
 
     // Initial population of the dropdown
