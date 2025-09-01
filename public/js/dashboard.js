@@ -1,5 +1,7 @@
 import { charts, pollingConfig, createOrUpdateChart, fetchChartData } from './chart-build.js';
 
+let currentDashboardName = null;
+
 
 function setupChartSettingsForItem(item, grid) {
     console.log('[CLIENT] Setting up chart settings for item:', item);
@@ -288,6 +290,7 @@ export function initializeDashboard() {
     // Check for dashboard name in URL query parameter
     const urlParams = new URLSearchParams(window.location.search);
     const dashboardNameFromUrl = urlParams.get('name');
+    currentDashboardName = dashboardNameFromUrl; // Store the loaded dashboard name
 
     if (dashboardNameFromUrl) {
         loadDashboard(dashboardNameFromUrl);
@@ -328,6 +331,12 @@ export function initializeDashboard() {
                 const layout = await response.json();
                 console.log('[CLIENT] Dashboard loaded:', layout);
                 grid.removeAll(); // Clear existing widgets
+
+                // Update the header title with the dashboard name
+                const appTitleElement = document.getElementById('app-title');
+                if (appTitleElement) {
+                    appTitleElement.textContent = dashboardName;
+                }
 
                 // Convert the loaded layout to GridStack format
                 const gridStackLayout = layout.map(chartConfig => {
@@ -475,7 +484,7 @@ export function initializeDashboard() {
         saveDashboardBtn.addEventListener('click', async (event) => {
             event.preventDefault();
 
-            const dashboardName = prompt("Enter a name for your dashboard:");
+            const dashboardName = prompt("Enter a name for your dashboard:", currentDashboardName || "");
             if (!dashboardName) {
                 alert("Dashboard name cannot be empty. Save cancelled.");
                 return;
@@ -519,8 +528,8 @@ export function initializeDashboard() {
                 if (response.ok) {
                     const result = await response.json();
                     console.log('[CLIENT] Dashboard saved successfully:', result.message);
-                    alert('Dashboard saved successfully!');
-                    populateDashboardsDropdown(); // Refresh the list after saving
+                    alert('Dashboard configuration saved successfully!');
+                    window.location.reload(); // Reload the page
                 } else {
                     const errorData = await response.json();
                     console.error('[CLIENT] Failed to save dashboard:', errorData.message);
@@ -529,6 +538,41 @@ export function initializeDashboard() {
             } catch (error) {
                 console.error('[CLIENT] Error saving dashboard:', error);
                 alert('Error saving dashboard: ' + error.message);
+            }
+        });
+    }
+
+    // Remove Dashboard button logic
+    const removeDashboardBtn = document.getElementById('remove-dashboard-btn');
+    if (removeDashboardBtn) {
+        removeDashboardBtn.addEventListener('click', async (event) => {
+            event.preventDefault();
+
+            if (!currentDashboardName) {
+                alert("No dashboard loaded to remove.");
+                return;
+            }
+
+            if (confirm(`Are you sure you want to remove dashboard "${currentDashboardName}"?`)) {
+                try {
+                    const response = await fetch(`/api/dashboards/${encodeURIComponent(currentDashboardName)}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        console.log('[CLIENT] Dashboard removed successfully:', result.message);
+                        alert('Dashboard removed successfully!');
+                        window.location.href = '/pages/dashboards.html'; // Redirect to a clean dashboard page
+                    } else {
+                        const errorData = await response.json();
+                        console.error('[CLIENT] Failed to remove dashboard:', errorData.message);
+                        alert('Failed to remove dashboard: ' + errorData.message);
+                    }
+                } catch (error) {
+                    console.error('[CLIENT] Error removing dashboard:', error);
+                    alert('Error removing dashboard: ' + error.message);
+                }
             }
         });
     }

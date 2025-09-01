@@ -99,6 +99,25 @@ app.post('/dashboard', async (req, res) => {
     }
 });
 
+// Endpoint to delete a dashboard by name
+app.delete('/api/dashboards/:name', async (req, res) => {
+    const dashboardName = req.params.name;
+    const filePath = path.join(__dirname, 'data', `${dashboardName}.json`);
+
+    try {
+        await fsPromises.unlink(filePath);
+        console.log(`[SERVER] Dashboard "${dashboardName}" deleted successfully.`);
+        res.status(200).json({ message: `Dashboard "${dashboardName}" deleted successfully.` });
+    } catch (error) {
+        console.error(`[SERVER ERROR] Failed to delete dashboard "${dashboardName}":`, error);
+        if (error.code === 'ENOENT') {
+            res.status(404).json({ message: `Dashboard "${dashboardName}" not found.` });
+        } else {
+            res.status(500).json({ message: `Failed to delete dashboard "${dashboardName}"`, error: error.message });
+        }
+    }
+});
+
 // Basic error handling middleware
 app.use((err, req, res, next) => {
     console.error('[SERVER ERROR]', err.stack);
