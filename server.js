@@ -78,20 +78,41 @@ app.get('/api/dashboards/:name', async (req, res) => {
 
 // Endpoint to save dashboard configuration
 app.post('/dashboard', async (req, res) => {
-    const config = req.body;
-    const dashboardName = req.query.name;
+    const dashboardNameFromQuery = req.query.name;
+    let { newName, lastName, layout } = req.body;
+    let config = req.body;
 
-    if (!dashboardName) {
+    const finalNewName = newName || dashboardNameFromQuery;
+
+    if (!finalNewName) {
         return res.status(400).json({ message: 'Dashboard name is required.' });
     }
 
-    const filePath = path.join(__dirname, 'data', `${dashboardName}.json`);
+    if (layout) { // New format from our modified client
+        config = layout;
+    }
+
+    if (lastName && finalNewName !== lastName) {
+        const oldFilePath = path.join(__dirname, 'data', `${lastName}.json`);
+        try {
+            await fsPromises.unlink(oldFilePath);
+            console.log(`[SERVER] Deleted old dashboard file for rename: ${oldFilePath}`);
+        } catch (error) {
+            // If the file doesn't exist, that's fine. But if another error occurs, it's a problem.
+            if (error.code !== 'ENOENT') {
+                console.error(`[SERVER ERROR] Could not delete old dashboard file '${oldFilePath}' during rename:`, error);
+                // Return a specific error to the client
+                return res.status(500).json({ message: `Failed to remove old dashboard '${lastName}' during rename.`, error: error.message });
+            }
+        }
+    }
+
+    const newFilePath = path.join(__dirname, 'data', `${finalNewName}.json`);
 
     try {
-        // Ensure the data directory exists
-        await fsPromises.mkdir(path.dirname(filePath), { recursive: true });
-        await fsPromises.writeFile(filePath, JSON.stringify(config, null, 2));
-        console.log('[SERVER] Dashboard configuration saved to:', filePath);
+        await fsPromises.mkdir(path.dirname(newFilePath), { recursive: true });
+        await fsPromises.writeFile(newFilePath, JSON.stringify(config, null, 2));
+        console.log('[SERVER] Dashboard configuration saved to:', newFilePath);
         res.status(200).json({ message: 'Dashboard configuration saved successfully!' });
     } catch (error) {
         console.error('[SERVER ERROR] Failed to save dashboard configuration:', error);

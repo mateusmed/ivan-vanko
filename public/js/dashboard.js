@@ -294,9 +294,6 @@ export function initializeDashboard() {
 
     if (dashboardNameFromUrl) {
         loadDashboard(dashboardNameFromUrl);
-    } else {
-        // Initial population of the dropdown if no dashboard is specified in URL
-        populateDashboardsDropdown();
     }
 
     grid.on('resizestop', function(event, el) {
@@ -315,12 +312,9 @@ export function initializeDashboard() {
         }
     });
 
-    // The setupFilterableChart function is not directly related to GridStack or dashboard management,
-    // so it can remain in script.js or be moved to a more general utility file if needed.
-    // For now, I'll leave it out of dashboard.js as it's a specific chart example.
-
     setupChartSettingsForGrid(grid);
     setupAddChartButton(grid);
+    // populateDashboardsDropdown();
 
     // Function to load a dashboard from the backend
     async function loadDashboard(dashboardName) {
@@ -414,11 +408,25 @@ export function initializeDashboard() {
                     fetchChartData(chartId, chartUrl, chartType, charts[chartId]?.options || initialOptions);
                 });
 
-                alert(`Dashboard "${dashboardName}" loaded successfully!`);
             } else {
-                const errorData = await response.json();
-                console.error('[CLIENT] Failed to load dashboard:', errorData.message);
-                alert('Failed to load dashboard: ' + errorData.message);
+                if (response.status === 404) {
+                    if (dashboardName !== 'new-dashboard') {
+                        const errorData = await response.json();
+                        console.error('[CLIENT] Failed to load dashboard:', errorData.message);
+                        alert('Failed to load dashboard: ' + errorData.message);
+                    } else {
+                        const appTitleElement = document.getElementById('app-title');
+                        if (appTitleElement) {
+                            appTitleElement.textContent = dashboardName;
+                        }
+                        currentDashboardName = dashboardName;
+                        grid.removeAll();
+                    }
+                } else {
+                    const errorData = await response.json();
+                    console.error('[CLIENT] Failed to load dashboard:', errorData.message);
+                    alert('Failed to load dashboard: ' + errorData.message);
+                }
             }
         } catch (error) {
             console.error('[CLIENT] Error loading dashboard:', error);
@@ -426,57 +434,59 @@ export function initializeDashboard() {
         }
     }
 
-    // Function to populate the Dashboards dropdown
-    async function populateDashboardsDropdown() {
-        const layoutsDropdown = document.getElementById('layouts-dropdown');
-        if (!layoutsDropdown) return;
-
-        // Clear existing dynamic dashboards (keep "Novo Dashboard")
-        const existingDashboards = layoutsDropdown.querySelectorAll('[data-dashboard-name]');
-        existingDashboards.forEach(item => item.remove());
-
+    async function getDashboardNames() {
         try {
             const response = await fetch('/api/dashboards');
             if (response.ok) {
-                const dashboardNames = await response.json();
-                dashboardNames.forEach(name => {
-                    const a = document.createElement('a');
-                    a.href = `/pages/dashboards.html?name=${encodeURIComponent(name)}`;
-                    a.textContent = name;
-                    a.dataset.dashboardName = name; // Store the name for loading
-                    a.addEventListener('click', (event) => {
-                        event.preventDefault();
-                        loadDashboard(name);
-                    });
-                    layoutsDropdown.appendChild(a);
-                });
-            } else {
-                console.error('[CLIENT] Failed to fetch dashboard list.');
+                return await response.json();
             }
+            return [];
         } catch (error) {
             console.error('[CLIENT] Error fetching dashboard list:', error);
+            return [];
         }
     }
 
-    // Function to toggle dropdown visibility
-    function toggleDropdown(dropdownId) {
-        const dropdown = document.getElementById(dropdownId);
-        if (dropdown) {
-            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-        }
-    }
+    // async function populateDashboardsDropdown() {
+    //     const layoutsDropdown = document.getElementById('dashboard-options');
+    //     if (!layoutsDropdown) return;
+    //
+    //     const existingDashboards = layoutsDropdown.querySelectorAll('[data-dashboard-name]');
+    //     existingDashboards.forEach(item => item.remove());
+    //
+    //     try {
+    //         const dashboardNames = await getDashboardNames();
+    //         dashboardNames.forEach(name => {
+    //             const a = document.createElement('a');
+    //             a.href = `/pages/dashboards.html?name=${encodeURIComponent(name)}`;
+    //             a.textContent = name;
+    //             a.dataset.dashboardName = name;
+    //             layoutsDropdown.appendChild(a);
+    //         });
+    //     } catch (error) {
+    //         console.error('[CLIENT] Error populating dashboard list:', error);
+    //     }
+    // }
 
-    // Event listener for the Dashboards dropdown button
-    const dashboardsDropbtn = document.querySelector('.dropdown .dropbtn[href="#layouts"]');
-    if (dashboardsDropbtn) {
-        dashboardsDropbtn.addEventListener('click', (event) => {
-            event.preventDefault();
-            toggleDropdown('layouts-dropdown');
-        });
-    }
 
-    // Initial population of the dropdown
-    populateDashboardsDropdown();
+
+    // // Function to toggle dropdown visibility
+    // function toggleDropdown(dropdownId) {
+    //     const dropdown = document.getElementById(dropdownId);
+    //     if (dropdown) {
+    //         dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    //     }
+    // }
+    //
+    // // Event listener for the Dashboards dropdown button
+    // const dashboardsDropbtn = document.querySelector('.dropdown .dropbtn[href="#layouts"]');
+    // if (dashboardsDropbtn) {
+    //     dashboardsDropbtn.addEventListener('click', (event) => {
+    //         event.preventDefault();
+    //         toggleDropdown('layouts-dropdown');
+    //     });
+    // }
+
 
     // Save Dashboard button logic
     const saveDashboardBtn = document.getElementById('save-dashboard-btn');
@@ -490,14 +500,13 @@ export function initializeDashboard() {
                 return;
             }
 
-            const dashboardConfig = grid.save(); // Get the current grid layout (includes custom properties)
-            
+            const dashboardConfig = grid.save();
+
             const serializableCharts = dashboardConfig.map(widget => {
-                // Only process widgets that have chart-specific data
                 if (widget.chartType && widget.chartUrl) {
                     return {
                         type: widget.chartType,
-                        fixed: !!widget.static, // GridStack uses 'static' for fixed items
+                        fixed: !!widget.static,
                         coordinates: {
                             x: widget.x,
                             y: widget.y,
@@ -506,30 +515,39 @@ export function initializeDashboard() {
                         },
                         properties: {
                             url: widget.chartUrl,
-                            pooling: widget.poolingSeconds ? String(widget.poolingSeconds) : "60", // Default to "60" if not set
-                            title: widget.chartTitle // Save the chart title
+                            pooling: widget.poolingSeconds ? String(widget.poolingSeconds) : "60",
+                            title: widget.chartTitle
                         }
                     };
                 }
-                return null; // Filter out non-chart widgets
-            }).filter(item => item !== null); // Remove null entries
+                return null;
+            }).filter(item => item !== null);
 
-            console.log('[CLIENT] Saving serializable dashboard config:', serializableCharts);
+            const payload = {
+                newName: dashboardName,
+                layout: serializableCharts
+            };
+
+            if (currentDashboardName && currentDashboardName !== dashboardName) {
+                payload.lastName = currentDashboardName;
+            }
+
+            console.log('[CLIENT] Saving dashboard with payload:', payload);
 
             try {
-                const response = await fetch(`/dashboard?name=${encodeURIComponent(dashboardName)}`, {
+                const response = await fetch('/dashboard', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(serializableCharts)
+                    body: JSON.stringify(payload)
                 });
 
                 if (response.ok) {
                     const result = await response.json();
                     console.log('[CLIENT] Dashboard saved successfully:', result.message);
                     alert('Dashboard configuration saved successfully!');
-                    window.location.reload(); // Reload the page
+                    window.location.href = `/pages/dashboards.html?name=${encodeURIComponent(dashboardName)}`;
                 } else {
                     const errorData = await response.json();
                     console.error('[CLIENT] Failed to save dashboard:', errorData.message);
@@ -577,23 +595,24 @@ export function initializeDashboard() {
         });
     }
 
-    // Load Dashboard Layout logic (for mocked layout1)
-    const loadLayout1Btn = document.getElementById('load-layout-1');
-    if (loadLayout1Btn) {
-        loadLayout1Btn.addEventListener('click', async (event) => {
-            event.preventDefault();
-            const layoutName = event.target.dataset.layoutName;
-            // This now calls the generic loadDashboard function
-            loadDashboard(layoutName);
-        });
-    }
+    //
+    // // Load Dashboard Layout logic (for mocked layout1)
+    // const loadLayout1Btn = document.getElementById('load-layout-1');
+    // if (loadLayout1Btn) {
+    //     loadLayout1Btn.addEventListener('click', async (event) => {
+    //         event.preventDefault();
+    //         const layoutName = event.target.dataset.layoutName;
+    //         // This now calls the generic loadDashboard function
+    //         loadDashboard(layoutName);
+    //     });
+    // }
 
-    // Close dropdowns when clicking outside
-    window.addEventListener('click', (event) => {
-        if (!event.target.matches('.chart-settings-btn')) {
-            document.querySelectorAll('.chart-settings-dropdown').forEach(dropdown => {
-                dropdown.style.display = 'none';
-            });
-        }
-    });
+    // // Close dropdowns when clicking outside
+    // window.addEventListener('click', (event) => {
+    //     if (!event.target.matches('.chart-settings-btn')) {
+    //         document.querySelectorAll('.chart-settings-dropdown').forEach(dropdown => {
+    //             dropdown.style.display = 'none';
+    //         });
+    //     }
+    // })
 }
