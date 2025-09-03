@@ -17,8 +17,10 @@ export function createOrUpdateChart(elementId, type, data, options) {
         console.log(`[CLIENT] Loading indicator not found for ${elementId}`);
     }
 
-    if (data.filters) {
-        let filtersContainer = chartContainer.querySelector('.chart-filters');
+    const existingFiltersContainer = chartContainer.querySelector('.chart-filters');
+
+    if (data.filters && data.filters.length > 0) {
+        let filtersContainer = existingFiltersContainer;
         if (!filtersContainer) {
             filtersContainer = document.createElement('div');
             filtersContainer.className = 'chart-filters';
@@ -49,18 +51,16 @@ export function createOrUpdateChart(elementId, type, data, options) {
                 fetchChartData(elementId, newUrl, chartType, options);
             });
         });
+    } else if (existingFiltersContainer) {
+        existingFiltersContainer.remove();
     }
 
     const ctx = canvas.getContext('2d');
     if (charts[elementId]) {
-        // Update existing chart
         charts[elementId].data.labels = data.labels;
         charts[elementId].data.datasets = data.datasets;
-        // Merge options if necessary, or reassign if a full replacement is desired
-        
         charts[elementId].update();
     } else {
-        // Create new chart
         charts[elementId] = new Chart(ctx, { type, data, options });
         charts[elementId].config.customUrl = options.customUrl;
         charts[elementId].config.pollingSeconds = options.pollingSeconds;

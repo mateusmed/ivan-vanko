@@ -220,18 +220,32 @@ function openConfigureModal(chartId) {
 
     const chartElement = document.getElementById(chartId);
     const gridItem = chartElement.closest('.grid-stack-item');
-    const node = gridItem.gridstackNode; // Get the GridStack node for the current chart
+    const node = gridItem.gridstackNode;
 
-    // Populate the modal fields with current chart data
-    poolingSecondsInput.value = node.poolingSeconds || '60'; // Set current pooling seconds
+    const currentUrl = node.chartUrl || `/api/chart-boilerplate/${node.chartType}`;
+    const currentPooling = node.poolingSeconds || '60';
 
-    fetch(`/api/chart-boilerplate/${node.chartType}`)
-        .then(response => response.json())
+    poolingSecondsInput.value = currentPooling;
+    curlCommand.value = `curl -X GET ${currentUrl}`;
+
+    const fetchUrl = currentUrl.startsWith('http') ? currentUrl : window.location.origin + currentUrl;
+
+    fetch(fetchUrl)
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return response.json();
+        })
         .then(data => {
             jsonStructure.textContent = JSON.stringify(data, null, 2);
-            curlCommand.value = `curl -X GET ${window.location.origin}/api/chart-boilerplate/${node.chartType}`;
+        })
+        .catch(err => {
+            console.error("Error fetching chart data for modal:", err);
+            jsonStructure.textContent = 'Error loading chart data.';
+        })
+        .finally(() => {
             modal.style.display = 'block';
         });
+
 
     const closeBtn = modal.querySelector('.close-btn');
     closeBtn.onclick = function() {
@@ -248,16 +262,16 @@ function openConfigureModal(chartId) {
     updateBtn.onclick = function() {
         const newCurlCommand = curlCommand.value;
         const newPoolingSeconds = poolingSecondsInput.value;
-        
-        const urlRegex = /\s(https?:\/\/[^\s]+)/;
-        let newUrl = urlRegex.exec(newCurlCommand)[1];
-        
-        // Ensure newUrl includes the origin if it's a relative path
-        if (!newUrl.startsWith('http://') && !newUrl.startsWith('https://')) {
-            newUrl = window.location.origin + newUrl;
-        }
 
-        // Update the GridStack node with new properties
+        const urlRegex = /(https?:\/\/[^\s]+|\/[^\s]+)/;
+        const match = urlRegex.exec(newCurlCommand);
+        
+        if (!match) {
+            alert("Invalid cURL command. Could not extract URL.");
+            return;
+        }
+        let newUrl = match[0];
+
         if (node) {
             node.chartUrl = newUrl;
             node.poolingSeconds = newPoolingSeconds;
@@ -267,13 +281,20 @@ function openConfigureModal(chartId) {
             clearInterval(pollingConfig[chartId].intervalId);
         }
 
-        pollingConfig[chartId] = {
-            url: newUrl,
-            interval: newPoolingSeconds * 1000,
-            intervalId: setInterval(() => {
-                fetchChartData(chartId, newUrl, charts[chartId].config.type, charts[chartId].options);
-            }, newPoolingSeconds * 1000)
-        };
+        const chart = charts[chartId];
+        const options = chart ? chart.options : {};
+
+        fetchChartData(chartId, newUrl, chart.config.type, options);
+
+        if (newPoolingSeconds > 0) {
+            pollingConfig[chartId] = {
+                url: newUrl,
+                interval: newPoolingSeconds * 1000,
+                intervalId: setInterval(() => {
+                    fetchChartData(chartId, newUrl, chart.config.type, options);
+                }, newPoolingSeconds * 1000)
+            };
+        }
 
         console.log('[CLIENT] Updating chart with:', { newUrl, newPoolingSeconds });
         modal.style.display = 'none';
