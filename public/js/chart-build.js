@@ -3,6 +3,14 @@ export const pollingConfig = {};
 
 export function createOrUpdateChart(elementId, type, data, options) {
     console.log(`[CLIENT] Creating or updating chart ${elementId}`);
+
+    // Ensure options and plugins objects exist
+    options = options || {};
+    options.plugins = options.plugins || {};
+
+    // Forcefully disable the title
+    options.plugins.title = { display: false };
+
     const canvas = document.getElementById(elementId);
     if (!canvas) {
         console.error(`[CLIENT] Canvas element not found for ${elementId}`);
@@ -57,8 +65,10 @@ export function createOrUpdateChart(elementId, type, data, options) {
 
     const ctx = canvas.getContext('2d');
     if (charts[elementId]) {
+        // Update existing chart
         charts[elementId].data.labels = data.labels;
         charts[elementId].data.datasets = data.datasets;
+        charts[elementId].options = options; // Re-apply options on update
         charts[elementId].update();
     } else {
         charts[elementId] = new Chart(ctx, { type, data, options });

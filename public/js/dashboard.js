@@ -397,7 +397,7 @@ export function initializeDashboard() {
                         maintainAspectRatio: false,
                         plugins: {
                             title: {
-                                display: true, // Show the Chart.js internal title
+                                display: false, // Show the Chart.js internal title
                                 text: chartTitle // Use the loaded chart title
                             }
                         }
