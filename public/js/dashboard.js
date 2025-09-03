@@ -203,7 +203,7 @@ function addNewChart(grid, chartType) {
         maintainAspectRatio: false,
         plugins: {
             title: {
-                display: true,
+                display: false,
                 text: chartTitle
             }
         }

@@ -96,18 +96,45 @@ main {
     min-height: 1250px;
 }
 .grid-stack-item-content { background-color: white; border: 1px solid #ccc; padding: 10px; box-sizing: border-box; display: flex; flex-direction: column; height: 100%; }
-.loading-indicator { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.2em; color: #888; }
-.chart-container { flex-grow: 1; position: relative; min-height: 0; }
-.chart-container canvas { width: 100% !important; height: 100% !important; } /* Ensure canvas fills container */
-.filter-controls-chart { margin-bottom: 10px; }
-.filter-controls-chart label, .filter-controls-chart select { margin-right: 5px; }
+/* Chart Layout Styling */
+.grid-stack-item-content {
+    display: flex;
+    flex-direction: column;
+}
 
-/* Chart Header */
+.chart-header {
+    flex-shrink: 0; /* Prevent header from shrinking */
+    padding: 0 10px; /* Spacing inside header */
+    margin-bottom: 10px;
+}
+
+.chart-filters {
+    flex-shrink: 0; /* Prevent filters from shrinking */
+    padding: 0 10px; /* Spacing inside filters */
+    margin-bottom: 10px;
+}
+
+.chart-container {
+    flex-grow: 1; /* Allow container to grow and fill space */
+    position: relative;
+    min-height: 0; /* Critical for allowing shrinking in flexbox */
+}
+
+.chart-container canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.loading-indicator { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.2em; color: #888; }
+
+/* Chart Header OLD */
 .chart-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
 }
 
 .chart-header h3 {
