@@ -25,14 +25,15 @@ export function createOrUpdateChart(elementId, type, data, options) {
         console.log(`[CLIENT] Loading indicator not found for ${elementId}`);
     }
 
-    const existingFiltersContainer = chartContainer.querySelector('.chart-filters');
+    const chartParent = chartContainer.parentElement;
+    const existingFiltersContainer = chartParent.querySelector('.chart-filters');
 
     if (data.filters && data.filters.length > 0) {
         let filtersContainer = existingFiltersContainer;
         if (!filtersContainer) {
             filtersContainer = document.createElement('div');
             filtersContainer.className = 'chart-filters';
-            chartContainer.insertBefore(filtersContainer, canvas);
+            chartParent.insertBefore(filtersContainer, chartContainer);
         }
         filtersContainer.innerHTML = '';
 
@@ -46,11 +47,12 @@ export function createOrUpdateChart(elementId, type, data, options) {
                 select.appendChild(opt);
             });
             select.value = filter.selected;
+            console.log(`[CLIENT] Setting select for key: ${filter.key}, value: ${filter.selected}`);
             filtersContainer.appendChild(select);
 
             select.addEventListener('change', (event) => {
                 const queryParams = new URLSearchParams();
-                chartContainer.querySelectorAll('.chart-filters select').forEach(s => {
+                chartParent.querySelectorAll('.chart-filters select').forEach(s => {
                     queryParams.append(s.dataset.key, s.value);
                 });
                 const chart = charts[elementId];
