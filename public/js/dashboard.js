@@ -206,7 +206,8 @@ function addNewChart(grid, chartType) {
                 display: false,
                 text: chartTitle
             }
-        }
+        },
+        customUrl: initialUrl // Add customUrl to options
     };
 
     fetchChartData(chartId, initialUrl, chartType, sampleOptions);
@@ -283,6 +284,11 @@ function openConfigureModal(chartId) {
 
         const chart = charts[chartId];
         const options = chart ? chart.options : {};
+
+        if (chart) {
+            chart.config.customUrl = newUrl;
+            chart.options.customUrl = newUrl; // Update options.customUrl
+        }
 
         fetchChartData(chartId, newUrl, chart.config.type, options);
 
@@ -400,7 +406,8 @@ export function initializeDashboard() {
                                 display: false, // Show the Chart.js internal title
                                 text: chartTitle // Use the loaded chart title
                             }
-                        }
+                        },
+                        customUrl: chartUrl // Add customUrl to options
                     };
 
                     // Initialize charts[chartId] with a dummy Chart.js instance or just options

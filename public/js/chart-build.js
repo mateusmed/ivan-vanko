@@ -57,7 +57,11 @@ export function createOrUpdateChart(elementId, type, data, options) {
                 });
                 const chart = charts[elementId];
                 const chartType = chart.config.type;
-                const newUrl = `/api/chart-boilerplate/${chartType}?${queryParams.toString()}`;
+                const baseUrl = chart.config.options.customUrl || `/api/chart-boilerplate/${chartType}`;
+                const newUrl = `${baseUrl}?${queryParams.toString()}`;
+
+                console.log("chart.config.customUrl", chart.config);
+                console.log("========>>>", newUrl);
                 fetchChartData(elementId, newUrl, chartType, options);
             });
         });
