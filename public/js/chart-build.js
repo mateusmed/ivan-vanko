@@ -58,7 +58,8 @@ export function createOrUpdateChart(elementId, type, data, options) {
                 const chart = charts[elementId];
                 const chartType = chart.config.type;
                 const baseUrl = chart.config.options.customUrl || `/api/chart-boilerplate/${chartType}`;
-                const newUrl = `${baseUrl}?${queryParams.toString()}`;
+                const separator = baseUrl.includes('?') ? '&' : '?';
+                const newUrl = `${baseUrl}${separator}${queryParams.toString()}`;
 
                 console.log("chart.config.customUrl", chart.config);
                 console.log("========>>>", newUrl);
