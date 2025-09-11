@@ -34,8 +34,37 @@
     </nav>
 </header>
 <main>
-    <h1>Welcome to the Home Page!</h1>
+    <div class="home-content">
+        <div class="home-left">
+            <img src="/images/ivan-vanko.png" alt="Explanatory Image" class="home-image">
+            <p class="insult-text">seu software é uma merda</p>
+        </div>
+        <div class="home-right">
+            <h2>Sobre o Sistema</h2>
+            <p>Este sistema, conhecido como Ivan-Vanko, é uma plataforma para a criação e visualização de dashboards interativos. Ele permite que os usuários montem layouts de grade personalizados, salvem e carreguem configurações de dashboard e visualizem dados de forma dinâmica.</p>
+            <p>A arquitetura é baseada em serviços, permitindo a fácil integração de novas fontes de dados e tipos de gráficos.</p>
+        </div>
+    </div>
 </main>
+
+<!-- About Modal -->
+<div id="aboutModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2>About - Ivan Vanko</h2>
+        <p>Version: 1.0.0</p>
+        <p>Author: Mateus Medeiros</p>
+        <div>
+            <a href="https://github.com/mateusmed" target="_blank">GitHub</a> |
+            <a href="https://www.linkedin.com/in/mateus-med" target="_blank">LinkedIn</a>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <a href="#" id="aboutLink">About</a>
+</footer>
+
 
 <!-- Chart.js -->
 <script src="js/lib/chart.js"></script>

@@ -32,7 +32,33 @@ document.addEventListener('DOMContentLoaded', function () {
 
     populateLayoutsDropdown();
     populateDashboardsDropdown();
+    initializeAboutModal();
 });
+
+function initializeAboutModal() {
+    const aboutModal = document.getElementById('aboutModal');
+    const aboutLink = document.getElementById('aboutLink');
+    const closeBtn = aboutModal.querySelector('.close-btn');
+
+    if (aboutLink) {
+        aboutLink.addEventListener('click', (event) => {
+            event.preventDefault();
+            aboutModal.style.display = 'block';
+        });
+    }
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            aboutModal.style.display = 'none';
+        });
+    }
+
+    window.addEventListener('click', (event) => {
+        if (event.target === aboutModal) {
+            aboutModal.style.display = 'none';
+        }
+    });
+}
 
 async function populateLayoutsDropdown() {
     const layoutsDropdown = document.getElementById('layout-options');

@@ -89,6 +89,58 @@ nav {
 /* Main Content Styling */
 main {
     flex-grow: 1;
+    padding: 2rem;
+}
+
+/* Home Page Content */
+.home-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+}
+
+.home-left {
+    flex: 1;
+    text-align: center;
+}
+
+.home-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.insult-text {
+    margin-top: 1rem;
+    font-weight: bold;
+    color: #d9534f; /* Red color for emphasis */
+    font-size: 1.2rem;
+}
+
+.home-right {
+    flex: 2;
+}
+
+/* Footer Styling */
+footer {
+    background: #333;
+    color: #fff;
+    padding: 1rem 0;
+    text-align: center;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+}
+
+footer a {
+    color: #fff;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
 }
 
 .grid-stack { 
