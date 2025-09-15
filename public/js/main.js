@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize dashboard-specific logic only on dashboard.html
     if (window.location.pathname.endsWith('/dashboards.html') || window.location.pathname.endsWith('/pages/dashboards.html')) {
-        import('./dashboard.js').then(({ initializeDashboard }) => {
+        import('./old/dashboard.js').then(({ initializeDashboard }) => {
             initializeDashboard();
         }).catch(error => {
             console.error('Error loading dashboard.js:', error);

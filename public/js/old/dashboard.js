@@ -462,59 +462,6 @@ export function initializeDashboard() {
         }
     }
 
-    async function getDashboardNames() {
-        try {
-            const response = await fetch('/api/dashboards');
-            if (response.ok) {
-                return await response.json();
-            }
-            return [];
-        } catch (error) {
-            console.error('[CLIENT] Error fetching dashboard list:', error);
-            return [];
-        }
-    }
-
-    // async function populateDashboardsDropdown() {
-    //     const layoutsDropdown = document.getElementById('dashboard-options');
-    //     if (!layoutsDropdown) return;
-    //
-    //     const existingDashboards = layoutsDropdown.querySelectorAll('[data-dashboard-name]');
-    //     existingDashboards.forEach(item => item.remove());
-    //
-    //     try {
-    //         const dashboardNames = await getDashboardNames();
-    //         dashboardNames.forEach(name => {
-    //             const a = document.createElement('a');
-    //             a.href = `/pages/dashboards.html?name=${encodeURIComponent(name)}`;
-    //             a.textContent = name;
-    //             a.dataset.dashboardName = name;
-    //             layoutsDropdown.appendChild(a);
-    //         });
-    //     } catch (error) {
-    //         console.error('[CLIENT] Error populating dashboard list:', error);
-    //     }
-    // }
-
-
-
-    // // Function to toggle dropdown visibility
-    // function toggleDropdown(dropdownId) {
-    //     const dropdown = document.getElementById(dropdownId);
-    //     if (dropdown) {
-    //         dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-    //     }
-    // }
-    //
-    // // Event listener for the Dashboards dropdown button
-    // const dashboardsDropbtn = document.querySelector('.dropdown .dropbtn[href="#layouts"]');
-    // if (dashboardsDropbtn) {
-    //     dashboardsDropbtn.addEventListener('click', (event) => {
-    //         event.preventDefault();
-    //         toggleDropdown('layouts-dropdown');
-    //     });
-    // }
-
 
     // Save Dashboard button logic
     const saveDashboardBtn = document.getElementById('save-dashboard-btn');
@@ -575,7 +522,7 @@ export function initializeDashboard() {
                     const result = await response.json();
                     console.log('[CLIENT] Dashboard saved successfully:', result.message);
                     alert('Dashboard configuration saved successfully!');
-                    window.location.href = `/pages/dashboards.html?name=${encodeURIComponent(dashboardName)}`;
+                    window.location.href = `../../pages/dashboards.html`;
                 } else {
                     const errorData = await response.json();
                     console.error('[CLIENT] Failed to save dashboard:', errorData.message);
@@ -609,7 +556,7 @@ export function initializeDashboard() {
                         const result = await response.json();
                         console.log('[CLIENT] Dashboard removed successfully:', result.message);
                         alert('Dashboard removed successfully!');
-                        window.location.href = '/pages/dashboards.html'; // Redirect to a clean dashboard page
+                        window.location.href = '../../pages/dashboards.html'; // Redirect to a clean dashboard page
                     } else {
                         const errorData = await response.json();
                         console.error('[CLIENT] Failed to remove dashboard:', errorData.message);
@@ -623,24 +570,4 @@ export function initializeDashboard() {
         });
     }
 
-    //
-    // // Load Dashboard Layout logic (for mocked layout1)
-    // const loadLayout1Btn = document.getElementById('load-layout-1');
-    // if (loadLayout1Btn) {
-    //     loadLayout1Btn.addEventListener('click', async (event) => {
-    //         event.preventDefault();
-    //         const layoutName = event.target.dataset.layoutName;
-    //         // This now calls the generic loadDashboard function
-    //         loadDashboard(layoutName);
-    //     });
-    // }
-
-    // // Close dropdowns when clicking outside
-    // window.addEventListener('click', (event) => {
-    //     if (!event.target.matches('.chart-settings-btn')) {
-    //         document.querySelectorAll('.chart-settings-dropdown').forEach(dropdown => {
-    //             dropdown.style.display = 'none';
-    //         });
-    //     }
-    // })
 }
