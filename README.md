@@ -19,6 +19,10 @@ O Ivan-Vanko é uma plataforma projetada para a criação e visualização de da
 
 A arquitetura é baseada em serviços, permitindo a fácil integração de novas fontes de dados e tipos de gráficos.
 
+## Projetos Complementares
+
+O **Ivan-Vanko** trabalha em conjunto com o [Justin-Hammer](https://github.com/mateusmed/justin-hammer). Enquanto o Ivan-Vanko é responsável por levantar e exibir os gráficos, o Justin-Hammer atua na simulação de dados ou na conexão com hosts para obtenção dessas informações, servindo como uma fonte de dados robusta para os dashboards.
+
 ## Como Executar
 
 1. Instale as dependências:
