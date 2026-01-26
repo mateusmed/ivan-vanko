@@ -1,0 +1,77 @@
+[
+  {
+    "type": "bar",
+    "fixed": false,
+    "coordinates": {
+      "x": 0,
+      "y": 0,
+      "w": 12,
+      "h": 11
+    },
+    "properties": {
+      "url": "http://localhost:3001/api/chart/requests_by_cloud_2?range=10m&aggregate=30s&temporal=true",
+      "pooling": "10",
+      "title": "Bar Chart - temporal"
+    }
+  },
+  {
+    "type": "line",
+    "fixed": false,
+    "coordinates": {
+      "x": 0,
+      "y": 11,
+      "w": 12,
+      "h": 9
+    },
+    "properties": {
+      "url": "http://localhost:3001/api/chart/cpu_load_comparison?range=1h&aggregate=1m&temporal=true",
+      "pooling": "60",
+      "title": "Line Chart - temporal"
+    }
+  },
+  {
+    "type": "bar",
+    "fixed": false,
+    "coordinates": {
+      "x": 0,
+      "y": 20,
+      "w": 6,
+      "h": 13
+    },
+    "properties": {
+      "url": "http://localhost:3001/api/chart/cpu_load_comparison",
+      "pooling": "60",
+      "title": "Bar Chart 0 - no temporal"
+    }
+  },
+  {
+    "type": "pie",
+    "fixed": false,
+    "coordinates": {
+      "x": 6,
+      "y": 20,
+      "w": 6,
+      "h": 13
+    },
+    "properties": {
+      "url": "http://localhost:3001/api/chart/count_response_by_status",
+      "pooling": "60",
+      "title": "Pie Chart 0 - no temporal"
+    }
+  },
+  {
+    "type": "pie",
+    "fixed": false,
+    "coordinates": {
+      "x": 6,
+      "y": 33,
+      "w": 6,
+      "h": 13
+    },
+    "properties": {
+      "url": "/api/chart-boilerplate/pie",
+      "pooling": "60",
+      "title": "Pie Chart 0"
+    }
+  }
+]
