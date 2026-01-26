@@ -1,11 +1,11 @@
 # Ivan-Vanko Dashboarding Tool
 
-![Explanatory Image](00doc/ivan-vanko.png)
+![Explanatory Image](ivan-vanko.png)
 
 "your software is a shit!"
 
 
-![page graphic exemple](00doc/page-graphic.png)
+![page graphic exemple](page-graphic.png)
 
 
 
