@@ -1,6 +1,6 @@
 # Ivan-Vanko Dashboarding Tool
 
-[readme-pt-Hammer](00doc/readme-pt.md). \
+[readme-pt](00doc/readme-pt.md).
 
 
 ![Explanatory Image](00doc/ivan-vanko.png)
