@@ -1,6 +1,15 @@
 # Ivan-Vanko Dashboarding Tool
 
-![Explanatory Image](public/images/ivan-vanko.png)
+![Explanatory Image](00doc/ivan-vanko.png)
+
+"your software is a shit!"
+
+
+![page graphic exemple](00doc/page-graphic.png)
+
+
+
+
 
 ## Sobre o Sistema
 
