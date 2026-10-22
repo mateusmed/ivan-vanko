@@ -1,116 +1,116 @@
+// Gráficos: busca os dados, aplica o tema (chart-theme.mjs) e desenha com o Chart.js.
+import { themeData, chartOptions, applyDefaults } from './chart-theme.mjs';
+
+export { CHART_TYPES } from './chart-theme.mjs';
+
 export const charts = {};
 export const pollingConfig = {};
 
-export function createOrUpdateChart(elementId, type, data, options) {
-    console.log(`[CLIENT] Creating or updating chart ${elementId}`);
+if (typeof window !== 'undefined' && window.Chart) applyDefaults(window.Chart);
 
-    // // Ensure options and plugins objects exist
-    // options = options || {};
-    // options.plugins = options.plugins || {};
-    //
-    // // Forcefully disable the title
-    // options.plugins.title = { display: false };
-
+export function createOrUpdateChart(elementId, type, data) {
     const canvas = document.getElementById(elementId);
-    if (!canvas) {
-        console.error(`[CLIENT] Canvas element not found for ${elementId}`);
+    if (!canvas) return;
+
+    setStatus(canvas, '');
+    renderFilters(canvas, elementId, type, data.filters || []);
+
+    const themed = themeData(type, data);
+    const chart = charts[elementId];
+
+    if (chart && chart.config.type === type) {
+        chart.data.labels = themed.labels;
+        chart.data.datasets = themed.datasets;
+        chart.update();
         return;
     }
-    const chartContainer = canvas.parentElement;
-    const loadingIndicator = chartContainer.querySelector('.loading-indicator');
-    if (loadingIndicator) {
-        console.log(`[CLIENT] Hiding loading indicator for ${elementId}`);
-        loadingIndicator.style.display = 'none';
-    } else {
-        console.log(`[CLIENT] Loading indicator not found for ${elementId}`);
-    }
 
-    const chartParent = chartContainer.parentElement;
-    const existingFiltersContainer = chartParent.querySelector('.chart-filters');
-
-    if (data.filters && data.filters.length > 0) {
-        let filtersContainer = existingFiltersContainer;
-        if (!filtersContainer) {
-            filtersContainer = document.createElement('div');
-            filtersContainer.className = 'chart-filters';
-            chartParent.insertBefore(filtersContainer, chartContainer);
-        }
-        filtersContainer.innerHTML = '';
-
-        data.filters.forEach(filter => {
-            const select = document.createElement('select');
-            select.dataset.key = filter.key;
-            filter.options.forEach(option => {
-                const opt = document.createElement('option');
-                opt.value = option;
-                opt.text = option;
-                select.appendChild(opt);
-            });
-            select.value = filter.selected;
-            console.log(`[CLIENT] Setting select for key: ${filter.key}, value: ${filter.selected}`);
-            filtersContainer.appendChild(select);
-
-            select.addEventListener('change', (event) => {
-                const queryParams = new URLSearchParams();
-                chartParent.querySelectorAll('.chart-filters select').forEach(s => {
-                    queryParams.append(s.dataset.key, s.value);
-                });
-                const chart = charts[elementId];
-                const chartType = chart.config.type;
-                const baseUrl = chart.config.options.customUrl || `/api/chart-boilerplate/${chartType}`;
-                const separator = baseUrl.includes('?') ? '&' : '?';
-                const newUrl = `${baseUrl}${separator}${queryParams.toString()}`;
-
-                console.log("chart.config.customUrl", chart.config);
-                console.log("========>>>", newUrl);
-                fetchChartData(elementId, newUrl, chartType, options);
-            });
-        });
-    } else if (existingFiltersContainer) {
-        existingFiltersContainer.remove();
-    }
-
-    const ctx = canvas.getContext('2d');
-    if (charts[elementId]) {
-        // Update existing chart
-        charts[elementId].data.labels = data.labels;
-        charts[elementId].data.datasets = data.datasets;
-        // Merge options if necessary, or reassign if a full replacement is desired
-
-        charts[elementId].update();
-    } else {
-        // Create new chart
-        charts[elementId] = new Chart(ctx, { type, data, options });
-        charts[elementId].config.customUrl = options.customUrl;
-        charts[elementId].config.pollingSeconds = options.pollingSeconds;
-        charts[elementId].config.type = type;
-        charts[elementId].options = options;
-    }
-    console.log(`[CLIENT] Chart ${elementId} created successfully`);
+    chart?.destroy();
+    charts[elementId] = new Chart(canvas.getContext('2d'), { type, data: themed, options: chartOptions(type) });
 }
 
-export function fetchChartData(elementId, url, type, options) {
-    console.log(`[CLIENT] Fetching data for ${elementId} from ${url}`);
-    fetch(url)
-        .then(response => {
-            console.log(`[CLIENT] Received response for ${elementId}`, response);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log(`[CLIENT] Received data for ${elementId}`, data);
-            createOrUpdateChart(elementId, type, data, options);
-        })
-        .catch(error => {
-            console.error(`[CLIENT] Error fetching data for ${elementId}:`, error);
-            const chartContainer = document.getElementById(elementId)?.parentElement;
-            if (chartContainer) {
-                const loadingIndicator = chartContainer.querySelector('.loading-indicator');
-                if (loadingIndicator) {
-                    loadingIndicator.textContent = 'Error!';
-                }
-            }
+export async function fetchChartData(elementId, url, type) {
+    const canvas = document.getElementById(elementId);
+    if (!canvas) return null;
+    if (!charts[elementId]) setStatus(canvas, 'Carregando os dados...');
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`a fonte respondeu ${response.status}`);
+
+        const data = await response.json();
+        createOrUpdateChart(elementId, type, data);
+        return data;
+    } catch (error) {
+        console.error(`[CLIENT] Error fetching data for ${elementId}:`, error);
+        // TypeError do fetch = nem chegou resposta (fonte fora do ar, endereço errado ou bloqueio de CORS)
+        const reason = error instanceof TypeError ? 'a fonte não respondeu (fora do ar, endereço errado ou CORS)' : error.message;
+        setStatus(canvas, `Não consegui carregar os dados: ${reason}.`, true);
+        return null;
+    }
+}
+
+// Polling: um intervalo por gráfico, trocado sempre que a URL ou o tempo mudam
+export function startPolling(elementId, url, type, seconds) {
+    stopPolling(elementId);
+    const interval = Number(seconds);
+    if (!interval || interval <= 0) return;
+
+    pollingConfig[elementId] = {
+        url,
+        interval: interval * 1000,
+        intervalId: setInterval(() => fetchChartData(elementId, url, type), interval * 1000)
+    };
+}
+
+export function stopPolling(elementId) {
+    if (!pollingConfig[elementId]) return;
+    clearInterval(pollingConfig[elementId].intervalId);
+    delete pollingConfig[elementId];
+}
+
+export function destroyChart(elementId) {
+    stopPolling(elementId);
+    charts[elementId]?.destroy();
+    delete charts[elementId];
+}
+
+function setStatus(canvas, message, isError = false) {
+    const status = canvas.parentElement.querySelector('.chart-status');
+    if (!status) return;
+
+    status.textContent = message;
+    status.hidden = !message;
+    status.classList.toggle('error', isError);
+}
+
+// Filtros que a fonte de dados oferece (ex.: região, ano): mudar um busca de novo com o filtro na URL
+function renderFilters(canvas, elementId, type, filters) {
+    const card = canvas.closest('.grid-stack-item-content');
+    const container = card.querySelector('.chart-filters');
+    if (!container) return;
+
+    container.hidden = filters.length === 0;
+    container.replaceChildren(...filters.map(filter => {
+        const label = document.createElement('label');
+        const select = document.createElement('select');
+        select.dataset.key = filter.key;
+
+        for (const option of filter.options || []) {
+            select.append(new Option(option, option, false, option === filter.selected));
+        }
+
+        select.addEventListener('change', () => {
+            const params = new URLSearchParams();
+            container.querySelectorAll('select').forEach(item => params.append(item.dataset.key, item.value));
+
+            const node = canvas.closest('.grid-stack-item').gridstackNode;
+            const baseUrl = node?.chartUrl || `/api/chart-boilerplate/${type}`;
+            const separator = baseUrl.includes('?') ? '&' : '?';
+            fetchChartData(elementId, `${baseUrl}${separator}${params}`, type);
         });
+
+        label.append(filter.label || filter.key, select);
+        return label;
+    }));
 }

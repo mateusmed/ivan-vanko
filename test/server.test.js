@@ -81,3 +81,9 @@ test('dados de exemplo trazem labels e datasets para cada tipo de gráfico', asy
         assert.ok(Array.isArray(data.datasets) && data.datasets.length > 0, type);
     }
 });
+
+test('módulos .mjs do front saem como JavaScript (o navegador recusa outro tipo)', async () => {
+    const res = await fetch(`${base}/js/layout.mjs`);
+    assert.equal(res.status, 200);
+    assert.match(res.headers.get('content-type'), /javascript/);
+});

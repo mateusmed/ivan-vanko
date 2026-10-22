@@ -1,77 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title>Dashboards - ivan-vanko</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/gridstack.min.css"/>
 </head>
 <body>
-<header>
-    <nav>
-        <div class="logo">Ivan-Vanko</div>
-        <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li class="dropdown">
-                <a href="" class="dropbtn">Layouts</a>
-                <div class="dropdown-content" id="layout-options">
-                    <a href="#">Service 1</a>
-                    <a href="#">Service 2</a>
-                    <a href="#">Service 3</a>
-                </div>
-            </li>
+<div class="app">
+    <aside class="side" aria-label="Navegação">
+        <a class="logo" href="/">ivan<b>vanko</b></a>
+        <p class="side-title">Dashboards</p>
+        <div id="dashboard-list"></div>
+        <a class="side-add" href="/pages/dashboards.html">+ Novo dashboard</a>
+        <p class="side-title">Exemplos</p>
+        <div id="example-list"></div>
+        <div class="side-footer">
+            <button type="button" data-open="aboutDialog">Sobre</button>
+            <a href="https://github.com/mateusmed/ivan-vanko" target="_blank" rel="noopener">GitHub</a>
+        </div>
+    </aside>
 
-            <li class="dropdown">
-                <div class="dropdown">
-                    <a href="" class="dropbtn">Dashboards</a>
-                    <div class="dropdown-content" id="dashboard-options">
-                        <a href="/pages/dashboards.html">Novo Dashboard</a>
-                    </div>
-                </div>
-            </li>
-        </ul>
-    </nav>
-</header>
-<main>
-    <div class="home-content">
-        <div class="home-left">
-            <img src="/images/ivan-vanko.png" alt="Explanatory Image" class="home-image">
-            <p class="insult-text">The software is shit.</p>
-        </div>
-        <div class="home-right">
-            <h2>Sobre o Sistema</h2>
-            <p>Este sistema, conhecido como Ivan-Vanko, é uma plataforma para a criação e visualização de dashboards interativos. Ele permite que os usuários montem layouts de grade personalizados, salvem e carreguem configurações de dashboard e visualizem dados de forma dinâmica.</p>
-            <p>A arquitetura é baseada em serviços, permitindo a fácil integração de novas fontes de dados e tipos de gráficos.</p>
-        </div>
-    </div>
-</main>
+    <main class="main">
+        <header class="top">
+            <div>
+                <p class="crumb">ivan-vanko</p>
+                <h1>Dashboards</h1>
+            </div>
+            <div class="actions"><a class="btn" href="/pages/dashboards.html">Novo dashboard</a></div>
+        </header>
 
-<!-- About Modal -->
-<div id="aboutModal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h2>About - Ivan Vanko</h2>
-        <p>Version: 1.0.0</p>
-        <p>Author: Mateus Medeiros</p>
-        <div>
-            <a href="https://github.com/mateusmed" target="_blank">GitHub</a> |
-            <a href="https://www.linkedin.com/in/mateus-med" target="_blank">LinkedIn</a>
-        </div>
-    </div>
+        <section class="intro">
+            <img src="/images/ivan-vanko.png" alt="Ivan Vanko, o vilão de Homem de Ferro 2">
+            <div>
+                <p>Monte painéis de gráficos a partir de qualquer API que devolva JSON: escolha o tipo de gráfico,
+                    aponte a URL dos dados e defina de quanto em quanto tempo atualizar. Junto com o justin-hammer,
+                    vira o painel de métricas dos seus serviços.</p>
+                <blockquote>“Your software is a shit.” <span>Ivan Vanko</span></blockquote>
+            </div>
+        </section>
+
+        <h2 class="section-title">Seus dashboards</h2>
+        <div class="cards" id="dashboard-cards"><p class="hint">Carregando...</p></div>
+
+        <h2 class="section-title">Exemplos para começar</h2>
+        <div class="cards" id="example-cards"><p class="hint">Carregando...</p></div>
+    </main>
 </div>
 
-<footer>
-    <a href="#" id="aboutLink">About</a>
-</footer>
+<dialog id="aboutDialog" aria-labelledby="aboutTitle">
+    <div class="dialog-body">
+        <h2 id="aboutTitle">Sobre o ivan-vanko</h2>
+        <p>Versão 1.0.0, por Mateus Medeiros. Gráficos com Chart.js e grade com GridStack.</p>
+        <p><a href="https://github.com/mateusmed" target="_blank" rel="noopener">GitHub</a> ·
+            <a href="https://www.linkedin.com/in/mateus-med" target="_blank" rel="noopener">LinkedIn</a></p>
+    </div>
+    <div class="dialog-actions"><button class="btn btn-ghost" type="button" data-close>Fechar</button></div>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-
-<!-- Chart.js -->
-<script src="js/lib/chart.js"></script>
-<!-- Gridstack.js -->
-<script src="js/lib/gridstack-all.min.js"></script>
-<!-- Custom JavaScript -->
-<script src="js/main.js"></script>
-
+<script type="module" src="/js/home.js"></script>
 </body>
 </html>

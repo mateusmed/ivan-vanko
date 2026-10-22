@@ -1,89 +1,92 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Dashboard - ivan-vanko</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/gridstack.min.css">
     <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/gridstack.min.css" />
 </head>
 <body>
-    <header>
-        <nav>
-            <div class="logo" id="app-title">My App</div>
-            <ul class="nav-links">
-                <li><a href="/">Home</a></li>
-                <li class="dropdown">
-                    <a href="" class="dropbtn">Layouts</a>
-                    <div class="dropdown-content" id="layout-options">
-                        <a href="#" id="load-layout-1" data-layout-name="layout1">Service 1</a>
-                        <a href="#">Service 2</a>
-                        <a href="#">Service 3</a>
-                    </div>
-                </li>
-
-                <div class="dropdown">
-                    <a href="" class="dropbtn">Dashboards</a>
-                    <div class="dropdown-content" id="dashboard-options">
-                        <a href="/pages/dashboards.html?name=new-dashboard">Novo Dashboard</a>
-                    </div>
-                </div>
-
-                <li class="dropdown">
-                    <div class="dropdown">
-                        <a href="#" id="add-chart-btn" class="dropbtn">Add Chart</a>
-                        <div class="dropdown-content" id="add-chart-dropdown">
-                            <a href="#" data-chart-type="bar">Bar Chart</a>
-                            <a href="#" data-chart-type="pie">Pie Chart</a>
-                            <a href="#" data-chart-type="line">Line Chart</a>
-                            <a href="#" data-chart-type="doughnut">Doughnut Chart</a>
-                            <a href="#" data-chart-type="radar">Radar Chart</a>
-                            <a href="#" data-chart-type="polarArea">Polar Area Chart</a>
-                            <a href="#" data-chart-type="bubble">Bubble Chart</a>
-                            <a href="#" data-chart-type="scatter">Scatter Chart</a>
-                        </div>
-                    </div>
-                </li>
-                <li><a href="#" id="save-dashboard-btn">Save Dashboard</a></li>
-                <li><a href="#" id="remove-dashboard-btn">Remove Dashboard</a></li>
-            </ul>
-        </nav>
-    </header>
-    <main>
-        <div class="grid-stack">
+<div class="app">
+    <aside class="side" aria-label="Navegação">
+        <a class="logo" href="/">ivan<b>vanko</b></a>
+        <p class="side-title">Dashboards</p>
+        <div id="dashboard-list"></div>
+        <a class="side-add" href="/pages/dashboards.html">+ Novo dashboard</a>
+        <p class="side-title">Exemplos</p>
+        <div id="example-list"></div>
+        <div class="side-footer">
+            <a href="/">Início</a>
+            <a href="https://github.com/mateusmed/ivan-vanko" target="_blank" rel="noopener">GitHub</a>
         </div>
-    </main>
+    </aside>
 
-    <!-- Chart.js -->
-    <script src="../js/lib/chart.js"></script>
-    <!-- Gridstack.js -->
-    <script src="../js/lib/gridstack-all.min.js"></script>
-    <!-- Custom JavaScript -->
-    <script src="../js/main.js" type="module"></script>
-    <script src="../js/chart-build.js" type="module"></script>
-    <script src="../js/dashboard.js" type="module"></script>
-
-    <!-- Configuration Modal -->
-    <div id="configure-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2>Configure Chart</h2>
-            <div class="modal-body">
-                <div class="modal-left">
-                    <h3>JSON Structure</h3>
-                    <pre id="json-structure"></pre>
+    <main class="main">
+        <header class="top">
+            <div>
+                <p class="crumb" id="crumb">Novo dashboard</p>
+                <input class="name-field" id="dashboard-name" aria-label="Nome do dashboard" placeholder="nome-do-dashboard" autocomplete="off" spellcheck="false">
+                <p class="unsaved" id="unsaved" hidden>Alterações não salvas</p>
+            </div>
+            <div class="actions">
+                <details class="menu" id="add-chart-menu">
+                    <summary class="btn btn-ghost">Adicionar gráfico</summary>
+                    <div class="menu-list" id="add-chart-list"></div>
+                </details>
+                <button class="btn" type="button" id="save-dashboard-btn">Salvar</button>
+                <div class="confirm" id="remove-dashboard" hidden>
+                    <button class="link-danger" type="button" data-confirm-start>Excluir</button>
+                    <span data-confirm-ask hidden>Excluir de vez?
+                        <button class="btn btn-danger btn-small" type="button" id="remove-dashboard-btn">Excluir</button>
+                        <button class="btn btn-ghost btn-small" type="button" data-confirm-cancel>Cancelar</button>
+                    </span>
                 </div>
-                <div class="modal-right">
-                    <h3>cURL Command</h3>
-                    <textarea id="curl-command" rows="4"></textarea>
-                    <div class="form-group">
-                        <label for="pooling-seconds">Pooling Seconds</label>
-                        <input type="number" id="pooling-seconds" value="60">
-                    </div>
-                    <button id="update-chart-btn" class="btn">Update</button>
+            </div>
+        </header>
+
+        <div class="empty" id="empty-grid" hidden>
+            <h2>Nenhum gráfico ainda</h2>
+            <p>Use "Adicionar gráfico" para começar. Depois arraste e redimensione os quadros à vontade.</p>
+        </div>
+        <div class="grid-stack"></div>
+    </main>
+</div>
+
+<dialog id="configure-modal" aria-labelledby="configureTitle">
+    <form method="dialog">
+        <div class="dialog-body">
+            <h2 id="configureTitle">Configurar gráfico</h2>
+            <div class="dialog-columns">
+                <div>
+                    <label for="chart-title">Título</label>
+                    <input class="field" id="chart-title" autocomplete="off">
+                    <label for="chart-url">URL dos dados</label>
+                    <input class="field" id="chart-url" autocomplete="off" spellcheck="false">
+                    <p class="hint">Uma URL que devolva JSON com <code>labels</code> e <code>datasets</code>. Também aceita um comando <code>curl</code> colado.</p>
+                    <label for="pooling-seconds">Atualizar a cada (segundos)</label>
+                    <input class="field" type="number" id="pooling-seconds" min="0" step="1">
+                    <p class="hint">0 para não atualizar sozinho.</p>
+                </div>
+                <div>
+                    <span class="label">Dados que chegam agora</span>
+                    <pre class="data" id="json-structure">Carregando...</pre>
                 </div>
             </div>
         </div>
-    </div>
+        <div class="dialog-actions">
+            <button class="btn btn-ghost" type="button" data-close>Cancelar</button>
+            <button class="btn" value="ok" id="update-chart-btn">Aplicar</button>
+        </div>
+    </form>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="/js/lib/chart.js"></script>
+<script src="/js/lib/gridstack-all.min.js"></script>
+<script type="module" src="/js/dashboard.js"></script>
 </body>
 </html>
