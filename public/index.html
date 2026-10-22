@@ -10,21 +10,26 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<div class="app">
-    <aside class="side" aria-label="Navegação">
-        <a class="logo" href="/">ivan<b>vanko</b></a>
-        <p class="side-title">Dashboards</p>
-        <div id="dashboard-list"></div>
-        <a class="side-add" href="/pages/dashboards.html">+ Novo dashboard</a>
-        <p class="side-title">Exemplos</p>
-        <div id="example-list"></div>
-        <div class="side-footer">
-            <button type="button" data-open="aboutDialog">Sobre</button>
-            <a href="https://github.com/mateusmed/ivan-vanko" target="_blank" rel="noopener">GitHub</a>
-        </div>
-    </aside>
-
-    <main class="main">
+<header class="topbar">
+    <a class="logo" href="/">ivan<b>vanko</b></a>
+    <nav class="topnav" aria-label="Navegação">
+        <details class="menu menu-left">
+            <summary class="nav-link">Dashboards</summary>
+            <div class="menu-list menu-wide">
+                <p class="menu-title">Salvos</p>
+                <div id="dashboard-list"></div>
+                <p class="menu-title">Exemplos</p>
+                <div id="example-list"></div>
+            </div>
+        </details>
+        <a class="nav-link" href="/pages/dashboards.html">Novo dashboard</a>
+    </nav>
+    <div class="topbar-end">
+        <button class="nav-link" type="button" data-open="aboutDialog">Sobre</button>
+        <a class="nav-link" href="https://github.com/mateusmed/ivan-vanko" target="_blank" rel="noopener">GitHub</a>
+    </div>
+</header>
+<main class="main">
         <header class="top">
             <div>
                 <p class="crumb">ivan-vanko</p>
@@ -49,7 +54,6 @@
         <h2 class="section-title">Exemplos para começar</h2>
         <div class="cards" id="example-cards"><p class="hint">Carregando...</p></div>
     </main>
-</div>
 
 <dialog id="aboutDialog" aria-labelledby="aboutTitle">
     <div class="dialog-body">

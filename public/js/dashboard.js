@@ -1,7 +1,7 @@
 // Tela do dashboard: a grade de gráficos (GridStack), adicionar, configurar, fixar, remover, salvar e excluir.
 // Cada quadro guarda a própria configuração no nó do GridStack (chartType, chartUrl, poolingSeconds, chartTitle, fixed).
 import { CHART_TYPES, charts, fetchChartData, startPolling, destroyChart } from './chart-build.js';
-import { loadSidebar, showToast, setupDialogs, escapeHtml, element, NAME_PATTERN } from './ui.js';
+import { loadDashboardMenu, showToast, setupDialogs, setupMenus, escapeHtml, element, NAME_PATTERN } from './ui.js';
 import { serializeNodes, extractUrl, sourceLabel as describeSource, SAMPLE_URL_PREFIX, DEFAULT_POLLING_SECONDS } from './layout.mjs';
 
 let grid;
@@ -14,11 +14,12 @@ main();
 
 async function main() {
     setupDialogs();
+    setupMenus();
     // No celular a grade vira uma coluna: sem "float", os quadros sobem e não ficam buracos
     grid = GridStack.init({ float: window.innerWidth > 768, cellHeight: 30, column: 12, margin: 8 });
 
     const name = new URLSearchParams(window.location.search).get('name');
-    const { dashboards, examples } = await loadSidebar(name);
+    const { dashboards, examples } = await loadDashboardMenu(name);
     knownDashboards = dashboards;
 
     setupAddChartMenu();
@@ -161,12 +162,9 @@ function closeAllMenus() {
 function setupCloseMenus() {
     document.addEventListener('click', event => {
         if (!event.target.closest('.chart-tools')) closeAllMenus();
-        if (!event.target.closest('#add-chart-menu')) document.getElementById('add-chart-menu').open = false;
     });
     document.addEventListener('keydown', event => {
-        if (event.key !== 'Escape') return;
-        closeAllMenus();
-        document.getElementById('add-chart-menu').open = false;
+        if (event.key === 'Escape') closeAllMenus();
     });
 }
 
@@ -313,7 +311,7 @@ async function saveDashboard() {
     document.title = `${name} - ivan-vanko`;
     document.getElementById('crumb').textContent = 'Dashboard';
     document.getElementById('remove-dashboard').hidden = false;
-    knownDashboards = (await loadSidebar(name)).dashboards;
+    knownDashboards = (await loadDashboardMenu(name)).dashboards;
     markClean();
     showToast('Dashboard salvo.', 'ok');
 }

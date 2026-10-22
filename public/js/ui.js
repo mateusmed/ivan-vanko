@@ -1,4 +1,4 @@
-// Peças comuns às telas: menu lateral, avisos (toast), diálogo "Sobre" e escape de HTML.
+// Peças comuns às telas: barra superior (menu Dashboards), avisos (toast), diálogos e escape de HTML.
 
 // Mesmo padrão do servidor (server.js): o nome vira nome de arquivo
 export const NAME_PATTERN = /^[\p{L}\p{N}_-]{1,80}$/u;
@@ -24,11 +24,11 @@ export async function getJson(url) {
 
 
 // =============================================================================================
-// Menu lateral
+// Barra superior: menu "Dashboards" com os salvos e os exemplos
 // =============================================================================================
 
 // Preenche as listas de dashboards e exemplos e marca o aberto. Devolve as duas listas.
-export async function loadSidebar(activeName = null) {
+export async function loadDashboardMenu(activeName = null) {
     const [dashboards, examples] = await Promise.all([
         getJson('/api/dashboards').catch(() => []),
         getJson('/api/layouts-examples').catch(() => [])
@@ -44,12 +44,12 @@ function fillList(id, names, activeName, emptyText) {
     if (!list) return;
 
     if (names.length === 0) {
-        list.replaceChildren(element('p', 'side-empty', emptyText));
+        list.replaceChildren(element('p', 'menu-empty', emptyText));
         return;
     }
 
     list.replaceChildren(...names.map(name => {
-        const link = element('a', `side-item${name === activeName ? ' active' : ''}`, name);
+        const link = element('a', `menu-item${name === activeName ? ' active' : ''}`, name);
         link.href = dashboardUrl(name);
         if (name === activeName) link.setAttribute('aria-current', 'page');
         return link;
@@ -96,6 +96,18 @@ export function setupDialogs() {
         dialog.addEventListener('click', event => {
             if (event.target === dialog) dialog.close();
         });
+    });
+}
+
+// Menus (<details class="menu">) fecham ao clicar fora ou com Esc
+export function setupMenus() {
+    const closeAll = except => document.querySelectorAll('details.menu[open]').forEach(menu => {
+        if (menu !== except) menu.open = false;
+    });
+
+    document.addEventListener('click', event => closeAll(event.target.closest('details.menu')));
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') closeAll(null);
     });
 }
 

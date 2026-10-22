@@ -1,14 +1,15 @@
 // Início: os dashboards salvos e os exemplos, cada um com quantos gráficos tem e de que tipos
-import { loadSidebar, showNoticeFromUrl, setupDialogs, dashboardUrl, getJson, element } from './ui.js';
+import { loadDashboardMenu, showNoticeFromUrl, setupDialogs, setupMenus, dashboardUrl, getJson, element } from './ui.js';
 import { CHART_TYPES } from './chart-theme.mjs';
 
 main();
 
 async function main() {
     setupDialogs();
+    setupMenus();
     showNoticeFromUrl();
 
-    const { dashboards, examples } = await loadSidebar();
+    const { dashboards, examples } = await loadDashboardMenu();
     renderCards('dashboard-cards', dashboards, true);
     renderCards('example-cards', examples, false);
 }
