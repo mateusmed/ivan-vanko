@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const chartService = require('./services/chart.service.js');
+const { toChartData } = require('./services/metrics-adapter.js');
 const fs = require('fs');
 const fsPromises = require('fs/promises');
 const app = express();
@@ -14,6 +15,9 @@ const examplesDir = process.env.EXAMPLES_PATH || path.join(__dirname, 'data', 'l
 
 // Nome de dashboard vira nome de arquivo: só letras, números, "-" e "_" (nada de "../")
 const NAME_PATTERN = /^[\p{L}\p{N}_-]{1,80}$/u;
+
+// justin-hammer (métricas), pela rede interna: o navegador só fala com o ivan-vanko
+const METRICS_URL = process.env.METRICS_URL || 'http://localhost:3001';
 
 // Atraso da simulação, para o "carregando" aparecer (0 nos testes)
 const SIMULATED_DELAY_MS = Number(process.env.SIMULATED_DELAY_MS ?? 2000);
@@ -46,6 +50,26 @@ app.get('/api/chart-boilerplate/:chartType', (req, res) => {
         res.json(boilerplate);
     }, SIMULATED_DELAY_MS);
 });
+
+
+// Métricas: a consulta vai para o justin-hammer (/api/series) e volta no formato do Chart.js.
+// Ex.: /api/metrics/series?metric=traefik_service_requests_total&by=service&range=1h
+app.get('/api/metrics/series', (req, res) => proxyMetrics(res, '/api/series', req.query, toChartData));
+
+// Catálogo do justin-hammer: o que existe para consultar (métricas, tipos e valores das labels)
+app.get('/api/metrics/catalog', (req, res) => proxyMetrics(res, '/api/metrics', {}, data => data));
+
+async function proxyMetrics(res, route, query, convert) {
+    try {
+        const response = await fetch(`${METRICS_URL}${route}?${new URLSearchParams(query)}`, { signal: AbortSignal.timeout(10000) });
+        const body = await response.json();
+        if (!response.ok) return res.status(response.status).json(body);
+        return res.json(convert(body));
+    } catch (error) {
+        console.error(`[SERVER] justin-hammer (${METRICS_URL}) não respondeu: ${error.message}`);
+        return res.status(502).json({ message: 'O serviço de métricas (justin-hammer) não respondeu.' });
+    }
+}
 
 
 // Endpoint to list saved dashboards

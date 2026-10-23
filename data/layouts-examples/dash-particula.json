@@ -1,0 +1,38 @@
+[
+  {
+    "type": "line",
+    "coordinates": { "x": 0, "y": 0, "w": 6, "h": 13 },
+    "properties": {
+      "title": "Requisições por segundo, por app",
+      "url": "/api/metrics/series?metric=traefik_service_requests_total&by=service&range=1h&step=1m",
+      "pooling": "30"
+    }
+  },
+  {
+    "type": "pie",
+    "coordinates": { "x": 6, "y": 0, "w": 6, "h": 13 },
+    "properties": {
+      "title": "Requisições na última hora",
+      "url": "/api/metrics/series?metric=traefik_service_requests_total&fn=increase&by=service&range=1h&step=1h",
+      "pooling": "60"
+    }
+  },
+  {
+    "type": "line",
+    "coordinates": { "x": 0, "y": 13, "w": 6, "h": 13 },
+    "properties": {
+      "title": "Latência p95 (segundos), por app",
+      "url": "/api/metrics/series?metric=traefik_service_request_duration_seconds&fn=p95&by=service&range=1h&step=1m",
+      "pooling": "30"
+    }
+  },
+  {
+    "type": "bar",
+    "coordinates": { "x": 6, "y": 13, "w": 6, "h": 13 },
+    "properties": {
+      "title": "Erros (4xx e 5xx) por minuto, por app",
+      "url": "/api/metrics/series?metric=traefik_service_requests_total&fn=increase&by=service&where.code=~[45]..&range=30m&step=1m",
+      "pooling": "30"
+    }
+  }
+]
