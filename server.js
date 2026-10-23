@@ -9,6 +9,9 @@ const port = process.env.PORT || 3000;
 // Use environment variable for DATA path in production, with a fallback for local development.
 const dataDir = process.env.DATA_PATH || path.join(__dirname, 'data');
 
+// Exemplos vêm com o código, fora da pasta de dados: o volume do container não os esconde
+const examplesDir = process.env.EXAMPLES_PATH || path.join(__dirname, 'data', 'layouts-examples');
+
 // Nome de dashboard vira nome de arquivo: só letras, números, "-" e "_" (nada de "../")
 const NAME_PATTERN = /^[\p{L}\p{N}_-]{1,80}$/u;
 
@@ -62,10 +65,9 @@ app.get('/api/dashboards', async (req, res) => {
 
 // Endpoint to list example layouts
 app.get('/api/layouts-examples', async (req, res) => {
-    const layoutsDir = path.join(dataDir, 'layouts-examples');
     try {
-        await fsPromises.mkdir(layoutsDir, { recursive: true }); // Ensure directory exists
-        const files = await fsPromises.readdir(layoutsDir);
+        await fsPromises.mkdir(examplesDir, { recursive: true }); // Ensure directory exists
+        const files = await fsPromises.readdir(examplesDir);
         const layoutNames = files
             .filter(file => file.endsWith('.json'))
             .map(file => file.replace('.json', ''));
@@ -89,7 +91,7 @@ app.get('/api/dashboards/:name', async (req, res) => {
         res.status(200).json(JSON.parse(data));
     } catch (error) {
         // If not found in data directory, try layouts-examples directory
-        filePath = path.join(dataDir, 'layouts-examples', `${dashboardName}.json`);
+        filePath = path.join(examplesDir, `${dashboardName}.json`);
         try {
             let data = await fsPromises.readFile(filePath, 'utf8');
             res.status(200).json(JSON.parse(data));

@@ -6,7 +6,9 @@ const os = require('os');
 const path = require('path');
 
 const DATA = fs.mkdtempSync(path.join(os.tmpdir(), 'ivan-vanko-'));
+const EXAMPLES = fs.mkdtempSync(path.join(os.tmpdir(), 'ivan-vanko-exemplos-'));
 process.env.DATA_PATH = DATA;
+process.env.EXAMPLES_PATH = EXAMPLES;
 process.env.SIMULATED_DELAY_MS = '0';
 
 const { app, isValidName } = require('../server.js');
@@ -15,8 +17,7 @@ let server;
 let base;
 
 before(async () => {
-    fs.mkdirSync(path.join(DATA, 'layouts-examples'));
-    fs.writeFileSync(path.join(DATA, 'layouts-examples', 'exemplo.json'), '[]');
+    fs.writeFileSync(path.join(EXAMPLES, 'exemplo.json'), '[]');
     await new Promise(resolve => { server = app.listen(0, '127.0.0.1', resolve); });
     base = `http://127.0.0.1:${server.address().port}`;
 });
@@ -24,6 +25,7 @@ before(async () => {
 after(() => {
     server.close();
     fs.rmSync(DATA, { recursive: true, force: true });
+    fs.rmSync(EXAMPLES, { recursive: true, force: true });
 });
 
 const LAYOUT = [{ type: 'bar', fixed: false, coordinates: { x: 0, y: 0, w: 6, h: 13 }, properties: { url: '/api/chart-boilerplate/bar', pooling: '60', title: 'Vendas' } }];
