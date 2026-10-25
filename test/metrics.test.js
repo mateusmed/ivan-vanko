@@ -84,8 +84,10 @@ test('catálogo passa direto', async () => {
     assert.equal(catalog[0].name, 'traefik_service_requests_total');
 });
 
-test('o layout de exemplo da particula só usa a API de métricas', () => {
-    const layout = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'layouts-examples', 'dash-particula.json'), 'utf-8'));
-    assert.equal(layout.length, 4);
-    assert.ok(layout.every(widget => widget.properties.url.startsWith('/api/metrics/series?')));
+test('os layouts de exemplo (particula e segurança) só usam a API de métricas', () => {
+    for (const name of ['dash-particula', 'dash-seguranca']) {
+        const layout = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'layouts-examples', `${name}.json`), 'utf-8'));
+        assert.equal(layout.length, 4, name);
+        assert.ok(layout.every(widget => widget.properties.url.startsWith('/api/metrics/series?')), name);
+    }
 });

@@ -1,0 +1,38 @@
+[
+  {
+    "type": "pie",
+    "coordinates": { "x": 0, "y": 0, "w": 6, "h": 13 },
+    "properties": {
+      "title": "Bloqueados agora: pegos aqui × lista da comunidade",
+      "url": "/api/metrics/series?metric=cs_active_decisions&fn=last&by=origin&range=5m&step=5m",
+      "pooling": "60"
+    }
+  },
+  {
+    "type": "bar",
+    "coordinates": { "x": 6, "y": 0, "w": 6, "h": 13 },
+    "properties": {
+      "title": "Bloqueados agora, por motivo",
+      "url": "/api/metrics/series?metric=cs_active_decisions&fn=last&by=reason&range=5m&step=5m",
+      "pooling": "60"
+    }
+  },
+  {
+    "type": "line",
+    "coordinates": { "x": 0, "y": 13, "w": 6, "h": 13 },
+    "properties": {
+      "title": "Ataques pegos aqui por hora, por regra",
+      "url": "/api/metrics/series?metric=cs_alerts&fn=increase&by=reason&range=24h&step=1h",
+      "pooling": "300"
+    }
+  },
+  {
+    "type": "bar",
+    "coordinates": { "x": 6, "y": 13, "w": 6, "h": 13 },
+    "properties": {
+      "title": "Senhas erradas no SSH por hora",
+      "url": "/api/metrics/series?metric=cs_bucket_poured_total&fn=increase&where.name=crowdsecurity/ssh-bf&range=24h&step=1h",
+      "pooling": "300"
+    }
+  }
+]
